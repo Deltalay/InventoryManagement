@@ -27,3 +27,11 @@ For Linux:
 ```bash
 source .venv/bin/activate
 ```
+
+After create the virtual environemt and activate it we can install the neccessary dependecies in requirement.txt
+
+```bash
+pip install -r requirements.txt
+```
+
+And we done!
