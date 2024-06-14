@@ -2,10 +2,14 @@ import pymysql.cursors
 from dotenv import load_dotenv
 import os
 import bcrypt
+from enum import Enum
 load_dotenv()
 connection = None
 cursor = None
 
+class Role(Enum):
+    Admin="admin"
+    Employee="employee"
 
 def login(username, password):
     if len(username) < 0:
