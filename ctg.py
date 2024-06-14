@@ -20,7 +20,7 @@ def connect_to_mysql():
     return conn
 
 
-# Function to setup database (create tables: ctg and item)
+# Function to setup database 
 def setup_database(conn):
     try:
         with conn.cursor() as cursor:
@@ -113,31 +113,6 @@ def add_items_to_category(conn, category_id):
     except pymysql.Error as e:
         print(f"Error adding item: {e}")
 
-
-# # Function to fetch all items
-# def fetch_items(conn):
-#     try:
-#         with conn.cursor() as cursor:
-#             query = """
-#                 SELECT i.id, c.name as category_name, i.name, i.description, i.price, i.quantity
-#                 FROM item i
-#                 INNER JOIN ctg c ON i.category_id = c.id
-#             """
-#             cursor.execute(query)
-#
-#             for record in cursor:
-#                 print("---------------- ")
-#                 print("Item ID: ", record[0])
-#                 print("Category: ", record[1])
-#                 print("Name: ", record[2])
-#                 print("Description: ", record[3])
-#                 print("Price: ", record[4])
-#                 print("Quantity: ", record[5])
-#                 print()
-#     except pymysql.Error as e:
-#         print(f"Error fetching items: {e}")
-
-
 # Main function to orchestrate the script
 def main():
     conn = connect_to_mysql()
@@ -148,9 +123,6 @@ def main():
 
             # Create categories and add items
             create_category(conn)
-
-            # # Fetch items after all categories and items are added
-            # fetch_items(conn)
 
         finally:
             conn.close()
