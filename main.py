@@ -28,7 +28,7 @@ def login(username, password):
     result = cursor.fetchone()
     passwordHash = result['password']
     checkPassword = bcrypt.checkpw(password.encode("utf8"), str.encode(passwordHash))
-    if True:
+    if checkPassword:
         salt = bcrypt.gensalt()
         verifyString = "id:" + result["id"] + "name:"+result["username"]
         token = bcrypt.hashpw(verifyString.encode("utf8"), salt)
