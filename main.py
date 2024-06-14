@@ -76,7 +76,7 @@ def search_items(category_id_from_users):
 def search_items_first_letter(first_letter_from_users):
     try:
         # Define the query
-        query = "SELECT * FROM items WHERE name like %s and stock >0"
+        query = "SELECT * FROM items WHERE name like %s and stock > 0"
         
         # Execute the query
         cursor.execute(query, (first_letter_from_users + '%',))
@@ -91,6 +91,35 @@ def search_items_first_letter(first_letter_from_users):
         
     except Exception as e:
         print('INPUT ERROR:', e)
+
+def whole_store_discounted(amount_percentage_from_user):
+    try:
+        # Define the first query to select items and calculate discounted prices
+        select_query = "SELECT id, price, price * (1 - %s/100) as discounted_price FROM items"
+        
+        # Execute the first query
+        cursor.execute(select_query, (amount_percentage_from_user,))
+        results = cursor.fetchall()
+        
+        if results:
+            print('ITEMS FOUND:')
+            for row in results:
+                print(row)
+                # Define the update query to set the discounted price
+                update_query = "UPDATE items SET discounted_price = %s WHERE id = %s"
+                
+                # Execute the update query with the calculated discounted price and item id
+                cursor.execute(update_query, (row['discounted_price'], row['id']))
+                
+                # Commit the transaction to save the changes to the database
+                conn.commit()
+        else:
+            print('NO ITEMS FOUND')
+        
+    except Exception as e:
+        print('INPUT ERROR:', e)
+
+
 
 if __name__ == "__main__":
     load_dotenv()
