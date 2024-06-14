@@ -22,7 +22,7 @@ CREATE TABLE items (
 CREATE TABLE users (
     id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
     username VARCHAR(255) NOT NULL UNIQUE,
-    role ENUM('admin', 'employee') NOT NULL,
+    role ENUM('admin', 'employee') DEFAULT 'employee',
     token varchar(255) UNIQUE,
     token_exp TIMESTAMP,
     password VARCHAR(255) NOT NULL,
