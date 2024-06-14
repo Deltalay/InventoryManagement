@@ -109,6 +109,14 @@ def search_items(itemName):
 
 
 def add_item(item_name, item_description, item_price, item_stock, category_name, expires_date):
+    openFile = open("token", "r")
+    token = openFile.read()
+    verify_token = jwt.decode(token, os.getenv("SECRET"), algorithms="HS256")
+    admin_id = verify_token['id']
+    cursor.execute("SELECT * FROM users WHERE id=%s LIMIT 1", (admin_id))
+    result = cursor.fetchone()
+    if result["role"] != Role.Admin.value:
+        return False
     if len(item_name) <= 0:
         return {
             "error": "Please enter your name"
@@ -150,6 +158,14 @@ def add_item(item_name, item_description, item_price, item_stock, category_name,
 
 
 def delete_items(item_name):
+    openFile = open("token", "r")
+    token = openFile.read()
+    verify_token = jwt.decode(token, os.getenv("SECRET"), algorithms="HS256")
+    admin_id = verify_token['id']
+    cursor.execute("SELECT * FROM users WHERE id=%s LIMIT 1", (admin_id))
+    result = cursor.fetchone()
+    if result["role"] != Role.Admin.value:
+        return False
     try:
         cursor.execute("DELETE FROM items WHERE name=%s", (item_name))
         connection.commit()
