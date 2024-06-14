@@ -54,6 +54,37 @@ def login(username, password):
 def create_account(username, password, token):
     verify_token = ""
 
+def search_items(category_id_from_users):
+    try:
+        # Connect to the database
+        conn = pymysql.connect(
+            host='your_host',
+            user='your_user',
+            password='your_password',
+            database='your_database'
+        )
+        cursor = conn.cursor()
+        
+        # Define the query
+        query = "SELECT * FROM items WHERE category_id = %s AND stock > 0"
+        
+        # Execute the query
+        cursor.execute(query, (category_id_from_users,))
+        results = cursor.fetchall()
+        
+        if results:
+            print('RECORD FOUND:')
+            for row in results:
+                print(row)
+        else:
+            print('NO RECORDS FOUND')
+        
+    except Exception as e:
+        print('INPUT ERROR:', e)
+    finally:
+        cursor.close()
+        conn.close()
+
 
 if __name__ == "__main__":
     load_dotenv()
