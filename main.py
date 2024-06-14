@@ -1,9 +1,10 @@
 import pymysql.cursors
 from dotenv import load_dotenv
 import os
-import bcrypt
-from enum import Enum
 import datetime
+import bcrypt
+import jwt
+from enum import Enum
 load_dotenv()
 connection = None
 cursor = None
@@ -30,11 +31,13 @@ def login(username, password):
     checkPassword = bcrypt.checkpw(
         password.encode("utf8"), str.encode(passwordHash))
     if checkPassword:
-        salt = bcrypt.gensalt()
-        verifyString = "id:" + result["id"] + "name:"+result["username"] 
-        token = bcrypt.hashpw(verifyString.encode("utf8"), salt)
+        token = jwt.encode({
+            "id": result['id'],
+            "username": result['username']
+        }, os.getenv("SECRET"))
         formatTime = '%Y-%m-%d %H:%M:%S'
-        now = datetime.datetime.now().strftime(format=formatTime)
+        now = datetime.datetime.now() + datetime.timedelta(hours=12)
+        now.strftime(format=formatTime)
         cursor.execute(
             "UPDATE users SET token=%s, token_exp=%s WHERE id=%s", (
                 token, now, result['id'])
@@ -54,22 +57,23 @@ def login(username, password):
 def create_account(username, password, token):
     verify_token = ""
 
+
 def search_items(category_id_from_users):
-    try:        
+    try:
         # Define the query
         query = "SELECT * FROM items WHERE category_id = %s AND stock > 0"
-        
+
         # Execute the query
         cursor.execute(query, (category_id_from_users,))
         results = cursor.fetchall()
-        
+
         if results:
             print('RECORD FOUND:')
             for row in results:
                 print(row)
         else:
             print('NO RECORDS FOUND')
-        
+
     except Exception as e:
         print('INPUT ERROR:', e)
 
