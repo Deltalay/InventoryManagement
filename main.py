@@ -75,15 +75,6 @@ def search_items(category_id_from_users):
 
 def search_items_first_letter(first_letter_from_users):
     try:
-        # Connect to the database
-        conn = pymysql.connect(
-            host='your_host',
-            user='your_user',
-            password='your_password',
-            database='your_database'
-        )
-        cursor = conn.cursor()
-        
         # Define the query
         query = "SELECT * FROM items WHERE name like %s"
         
@@ -100,10 +91,6 @@ def search_items_first_letter(first_letter_from_users):
         
     except Exception as e:
         print('INPUT ERROR:', e)
-    finally:
-        cursor.close()
-        conn.close()
-
 
 if __name__ == "__main__":
     load_dotenv()
