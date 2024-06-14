@@ -27,10 +27,11 @@ def login(username, password):
         "SELECT * FROM users WHERE username=%s LIMIT 1", (username))
     result = cursor.fetchone()
     passwordHash = result['password']
-    checkPassword = bcrypt.checkpw(password.encode("utf8"), str.encode(passwordHash))
+    checkPassword = bcrypt.checkpw(
+        password.encode("utf8"), str.encode(passwordHash))
     if checkPassword:
         salt = bcrypt.gensalt()
-        verifyString = "id:" + result["id"] + "name:"+result["username"]
+        verifyString = "id:" + result["id"] + "name:"+result["username"] 
         token = bcrypt.hashpw(verifyString.encode("utf8"), salt)
         formatTime = '%Y-%m-%d %H:%M:%S'
         now = datetime.datetime.now().strftime(format=formatTime)
@@ -38,10 +39,12 @@ def login(username, password):
             "UPDATE users SET token=%s, token_exp=%s WHERE id=%s", (
                 token, now, result['id'])
         )
-
         resultToken = cursor.fetchone()
         for i in resultToken:
             print(resultToken[i])
+        return {
+            "token": token
+        }
     else:
         return {
             "error": "Wrong username or password."
