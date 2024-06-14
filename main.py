@@ -34,17 +34,19 @@ def login(username, password):
         token = jwt.encode({
             "id": result['id'],
             "username": result['username']
-        }, os.getenv("SECRET"))
-        formatTime = '%Y-%m-%d %H:%M:%S'
+        }, os.getenv("SECRET"),  algorithm="HS256")
+        formatTime = "%Y-%m-%d %H:%M:%S"
+
         now = datetime.datetime.now() + datetime.timedelta(hours=12)
+        now = now.replace(microsecond=0)
+
         now.strftime(format=formatTime)
+
         cursor.execute(
-            "UPDATE users SET token=%s, token_exp=%s WHERE id=%s", (
-                token, now, result['id'])
+            "UPDATE users SET token_val=%s, token_exp=%s WHERE id=%s", (
+                token, str(now), result['id'])
         )
-        resultToken = cursor.fetchone()
-        for i in resultToken:
-            print(resultToken[i])
+        connection.commit()
         return {
             "token": token
         }
@@ -55,7 +57,15 @@ def login(username, password):
 
 
 def create_account(username, password, token):
-    verify_token = ""
+    verify_token = jwt.decode(token, os.getenv("SECRET"), algorithms="HS256")
+    admin_id = verify_token['id']
+    cursor.execute("SELECT * FROM users WHERE id=%s LIMIT 1", (admin_id))
+    result = cursor.fetchone()
+    if result["role"] == Role.Admin.value:
+        print("You are an admin")
+    else:
+        print("Sorry you are not an admin")
+    
 
 
 def search_items(category_id_from_users):
@@ -85,7 +95,10 @@ if __name__ == "__main__":
         connection = pymysql.connect(host=os.getenv("HOST"), port=int(os.getenv("PORT")), database=os.getenv(
             "DATABASE"), user=os.getenv("USER"), password=os.getenv("PASSWORD"), cursorclass=pymysql.cursors.DictCursor)
         cursor = connection.cursor()
-        login("hi", "123")
+        logda = login("delta", "123123123")
+    
+        print(logda['token'])
+        create_account(token=logda["token"], username="he", password="d")
     except Exception as e:
         print(e)
         print("Something whent wrong")
