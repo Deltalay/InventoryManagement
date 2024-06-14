@@ -64,11 +64,11 @@ def search_items(category_id_from_users):
         results = cursor.fetchall()
         
         if results:
-            print('RECORD FOUND:')
+            print('ITEMS FOUND:')
             for row in results:
                 print(row)
         else:
-            print('NO RECORDS FOUND')
+            print('NO ITEMS FOUND')
         
     except Exception as e:
         print('INPUT ERROR:', e)
