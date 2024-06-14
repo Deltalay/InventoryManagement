@@ -11,6 +11,7 @@ CREATE TABLE items (
     name VARCHAR(255) NOT NULL,
     description VARCHAR(255),
     price DOUBLE,
+    discount_price DOUBLE,
     quantity INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     expire_date TIMESTAMP,
