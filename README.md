@@ -34,4 +34,4 @@ After create the virtual environemt and activate it we can install the neccessar
 pip install -r requirements.txt
 ```
 
-And we done!
+After that change `.env.example` to `.env` and place your database connection insde.
