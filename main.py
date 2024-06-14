@@ -76,7 +76,7 @@ def search_items(category_id_from_users):
 def search_items_first_letter(first_letter_from_users):
     try:
         # Define the query
-        query = "SELECT * FROM items WHERE name like %s"
+        query = "SELECT * FROM items WHERE name like %s and stock >0"
         
         # Execute the query
         cursor.execute(query, (first_letter_from_users + '%',))
