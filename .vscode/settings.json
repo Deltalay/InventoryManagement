@@ -1,0 +1,15 @@
+{
+  "sqltools.connections": [
+    {
+      "mysqlOptions": {
+        "authProtocol": "default",
+        "enableSsl": "Disabled"
+      },
+      "previewLimit": 50,
+      "server": "localhost",
+      "driver": "MySQL",
+      "name": "Test",
+      "connectString": "mysql://root:zaGvJwhDwVtFhIpDykVeLqvMsTKwPAgf@roundhouse.proxy.rlwy.net:31050/railway"
+    }
+  ]
+}
