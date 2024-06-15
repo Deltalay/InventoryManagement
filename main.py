@@ -203,7 +203,7 @@ def create_category(name):
         return True
 
 
-def search_item(item_name="", in_stock=True, price_low=0, price_high=0, category="all"):
+def search_items_filter(item_name="", in_stock=True, price_low=0, price_high=0, category="all"):
     query = """SELECT items.id, items.name, items.description, items.price, items.quantity, category.name AS category_name
                 FROM items
                 JOIN category ON items.category_id = category.id
