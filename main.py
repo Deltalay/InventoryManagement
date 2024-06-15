@@ -202,8 +202,37 @@ def create_category(name):
     else:
         return True
 
-def search_item(item_name, in_stock=True, price_low = 0, price_high = 0, category="all"):
-    print()
+
+def search_item(item_name="", in_stock=True, price_low=0, price_high=0, category="all"):
+    query = """SELECT items.id, items.name, items.description, items.price, items.quantity, category.name AS category_name
+                FROM items
+                JOIN category ON items.category_id = category.id
+                WHERE 1=1"""
+    params = []
+    if len(item_name) > 0:
+        query += " AND (description LIKE %s OR name LIKE %s)"
+        params.extend([f"%{item_name}%", f"%{item_name}%"])
+    if in_stock:
+        query += " AND quantity > 0"
+    if price_high > 0:
+        query += " AND price <= %s"
+        params.append(int(price_high))
+    if price_low > 0:
+        query += " AND price >= %s"
+        params.append(int(price_low))
+    if category.lower() != "all":
+        query += " AND category.name = %s"
+        params.append(category)
+
+    try:
+        cursor.execute(query, params)
+        results = cursor.fetchall()
+        for i in results:
+            print(results)
+        return results
+    except Exception as e:
+        print(e)
+
 
 def update_stock(item_name, price):
     openFile = open("token", "r")
@@ -258,8 +287,7 @@ if __name__ == "__main__":
         connection = pymysql.connect(host=os.getenv("HOST"), port=int(os.getenv("PORT")), database=os.getenv(
             "DATABASE"), user=os.getenv("USER"), password=os.getenv("PASSWORD"), cursorclass=pymysql.cursors.DictCursor)
         cursor = connection.cursor()
-        login("delta", "123123123")
-        create_account(username="he", password="d")
+        search_item(price_low=20000, in_stock=False, category="Food")
     except Exception as e:
         print(e)
         print("Something whent wrong")
