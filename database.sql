@@ -15,6 +15,7 @@ CREATE TABLE items (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     expire_date TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    discount DOUBLE,
     FOREIGN KEY (category_id) REFERENCES category(id)
 );
 
