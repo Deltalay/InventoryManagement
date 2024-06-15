@@ -102,7 +102,7 @@ def whole_store_discounted(amount_percentage_from_user):
         results = cursor.fetchall()
         
         if results:
-            print('ITEMS FOUND:')
+            print('DISCOUNTS ADDED SUCCESSFULLY.')
             for row in results:
                 print(row)
                 # Define the update query to set the discounted price
@@ -114,12 +114,38 @@ def whole_store_discounted(amount_percentage_from_user):
                 # Commit the transaction to save the changes to the database
                 conn.commit()
         else:
-            print('NO ITEMS FOUND')
+            print('DISCOUNTS ADDED UNSUCCESSFULLY.')
         
     except Exception as e:
         print('INPUT ERROR:', e)
+        
 
-
+def specific_items_discounted(amount_percentage_from_user, specific_items_id):
+    try:
+        # Define the first query to select items and calculate discounted prices
+        select_query = "SELECT id, price, price * (1 - %s/100) as discounted_price_specific_items FROM items WHERE id = %s"
+        
+        # Execute the first query
+        cursor.execute(select_query, (amount_percentage_from_user, specific_items_id,))
+        results = cursor.fetchall()
+        
+        if results:
+            print('DISCOUNTS ADDED SUCCESSFULLY.')
+            for row in results:
+                print(row)
+                # Define the update query to set the discounted price
+                update_query = "UPDATE items SET discounted_price_specific_items = %s WHERE id = %s"
+                
+                # Execute the update query with the calculated discounted price and item id
+                cursor.execute(update_query, (row['discounted_price_specific_items'], row['id']))
+                
+                # Commit the transaction to save the changes to the database
+                conn.commit()
+        else:
+            print('DISCOUNTS ADDED UNSUCCESSFULLY.')
+        
+    except Exception as e:
+        print('INPUT ERROR:', e)
 
 if __name__ == "__main__":
     load_dotenv()
