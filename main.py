@@ -287,7 +287,7 @@ if __name__ == "__main__":
         connection = pymysql.connect(host=os.getenv("HOST"), port=int(os.getenv("PORT")), database=os.getenv(
             "DATABASE"), user=os.getenv("USER"), password=os.getenv("PASSWORD"), cursorclass=pymysql.cursors.DictCursor)
         cursor = connection.cursor()
-        search_item(price_low=20000, in_stock=False, category="Food")
+        search_items_filter(price_low=20000, in_stock=False, category="Food")
     except Exception as e:
         print(e)
         print("Something whent wrong")
