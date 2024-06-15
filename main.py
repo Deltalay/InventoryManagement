@@ -157,6 +157,78 @@ def add_item(item_name, item_description, item_price, item_stock, category_name,
         return True
 
 
+def update_stock(item_name, quantity):
+    openFile = open("token", "r")
+    token = openFile.read()
+    verify_token = jwt.decode(token, os.getenv("SECRET"), algorithms="HS256")
+    admin_id = verify_token['id']
+    cursor.execute("SELECT * FROM users WHERE id=%s LIMIT 1", (admin_id))
+    result = cursor.fetchone()
+    if result["role"] != Role.Admin.value:
+        return False
+    if len(item_name) <= 0:
+        return {
+            "error": "Please enter the item name"
+        }
+    try:
+        cursor.execute("UPDATE items SET quantity=%s WHERE name=",
+                       (int(quantity), item_name))
+        connection.commit()
+    except Exception as e:
+        print(e)
+        return False
+    else:
+        return True
+
+
+def create_category(name):
+    if len(name) <= 0:
+        return {
+            "error": "Invalid name"
+        }
+    openFile = open("token", "r")
+    token = openFile.read()
+    verify_token = jwt.decode(token, os.getenv("SECRET"), algorithms="HS256")
+    admin_id = verify_token['id']
+    cursor.execute("SELECT * FROM users WHERE id=%s LIMIT 1", (admin_id))
+    result = cursor.fetchone()
+    if result["role"] != Role.Admin.value:
+        return False
+    try:
+        cursor.execute("INSERT INTO category(name) VALUES(%s)", (name))
+    except Exception as e:
+        print(e)
+        return False
+    else:
+        return True
+
+def search_item(item_name, in_stock=True, price_low = 0, price_high = 0, category="all"):
+    print()
+
+def update_stock(item_name, price):
+    openFile = open("token", "r")
+    token = openFile.read()
+    verify_token = jwt.decode(token, os.getenv("SECRET"), algorithms="HS256")
+    admin_id = verify_token['id']
+    cursor.execute("SELECT * FROM users WHERE id=%s LIMIT 1", (admin_id))
+    result = cursor.fetchone()
+    if result["role"] != Role.Admin.value:
+        return False
+    if len(item_name) <= 0:
+        return {
+            "error": "Please enter the item name"
+        }
+    try:
+        cursor.execute("UPDATE items SET price=%s WHERE name=",
+                       (int(price), item_name))
+        connection.commit()
+    except Exception as e:
+        print(e)
+        return False
+    else:
+        return True
+
+
 def delete_items(item_name):
     openFile = open("token", "r")
     token = openFile.read()
@@ -166,6 +238,10 @@ def delete_items(item_name):
     result = cursor.fetchone()
     if result["role"] != Role.Admin.value:
         return False
+    if len(item_name) <= 0:
+        return {
+            "error": "Please enter the item name"
+        }
     try:
         cursor.execute("DELETE FROM items WHERE name=%s", (item_name))
         connection.commit()
