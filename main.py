@@ -8,6 +8,7 @@ from enum import Enum
 load_dotenv()
 connection = None
 cursor = None
+discount_global = 0
 
 
 class Role(Enum):
@@ -278,6 +279,52 @@ def delete_items(item_name):
     except Exception as e:
         print(e)
         return False
+
+
+def set_discount_item(itemName, discount):
+    openFile = open("token", "r")
+    token = openFile.read()
+    verify_token = jwt.decode(token, os.getenv("SECRET"), algorithms="HS256")
+    admin_id = verify_token['id']
+    cursor.execute("SELECT * FROM users WHERE id=%s LIMIT 1", (admin_id))
+    result = cursor.fetchone()
+    if result["role"] != Role.Admin.value:
+        return False
+    if len(itemName) <= 0:
+        return {
+            "error": "Please enter the item name"
+        }
+    if int(discount) > 100 or int(discount) < 0:
+        return {
+            "error": "what are you trying to do?"
+        }
+    try:
+        cursor.execute(
+            "UPDATE items SET discount=%s WHERE name=%s", (int(
+                discount), itemName)
+        )
+        connection.commit()
+    except Exception as e:
+        print(e)
+        return False
+    else:
+        return True
+
+
+def set_global_discount(discount_amount):
+    openFile = open("token", "r")
+    token = openFile.read()
+    verify_token = jwt.decode(token, os.getenv("SECRET"), algorithms="HS256")
+    admin_id = verify_token['id']
+    cursor.execute("SELECT * FROM users WHERE id=%s LIMIT 1", (admin_id))
+    result = cursor.fetchone()
+    if result["role"] != Role.Admin.value:
+        return False
+    if int(discount_amount) > 100 or int(discount_amount) < 0:
+        return {
+            "error": "What are you trying to do?"
+        }
+    discount_global = int(discount_amount)
 
 
 if __name__ == "__main__":
