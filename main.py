@@ -118,7 +118,108 @@ def whole_store_discounted(amount_percentage_from_user):
         
     except Exception as e:
         print('INPUT ERROR:', e)
-        
+
+def create_product_table():
+    try:
+        query = """
+                   CREATE TABLE IF NOT EXISTS PRODUCT (
+                       category_id INT PRIMARY KEY NOT NULL,
+                       name VARCHAR(50) NOT NULL,
+                       description TEXT,
+                       price DECIMAL(10, 2) NOT NULL,
+                       quantity INT NOT NULL,
+                       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                       expire_date DATE
+                   )"""
+
+        cursor.execute(query)
+        print('Table created successfully')
+        conn.commit()
+    except Exception as ex:
+        print('PROBLEM WITH Database Connection:', ex)
+    finally:
+        conn.close()
+
+def insert_product():
+    try:
+        with conn.cursor() as cursor:
+            category_id = int(input("Enter category ID: "))
+            name = input("Enter product name: ")
+            description = input("Enter product description: ")
+            price = float(input("Enter product price: "))
+            quantity = int(input("Enter product quantity: "))
+            expire_date = input("Enter product expire date (YYYY-MM-DD): ")
+
+            query = """
+                INSERT INTO PRODUCT (category_id, name, description, price, quantity, expire_date)
+                VALUES (%s, %s, %s, %s, %s, %s)
+                """
+
+            cursor.execute(query, (category_id, name, description, price, quantity, expire_date))
+            conn.commit()
+            print("Product inserted successfully")
+    except Exception as e:
+        print('Error occurred while inserting product:', e)
+    finally:
+        conn.close()
+
+def delete_product():
+    try:
+        with conn.cursor() as cursor:
+            category_id = int(input("Enter category ID of the product to delete: "))
+            query = "DELETE FROM PRODUCT WHERE category_id = %s"
+
+            cursor.execute(query, (category_id,))
+            conn.commit()
+            print("Product deleted successfully")
+    except Exception as e:
+        print('Error occurred while deleting product:', e)
+    finally:
+        conn.close()
+
+def update_product():
+    try:
+        with conn.cursor() as cursor:
+            category_id = int(input("Enter category ID of the product to update: "))
+            name = input("Enter new product name (leave blank to keep current): ")
+            description = input("Enter new product description (leave blank to keep current): ")
+            price = input("Enter new product price (leave blank to keep current): ")
+            quantity = input("Enter new product quantity (leave blank to keep current): ")
+            expire_date = input("Enter new product expire date (YYYY-MM-DD) (leave blank to keep current): ")
+
+            update_fields = []
+            update_values = []
+
+            if name:
+                update_fields.append("name = %s")
+                update_values.append(name)
+            if description:
+                update_fields.append("description = %s")
+                update_values.append(description)
+            if price:
+                update_fields.append("price = %s")
+                update_values.append(float(price))
+            if quantity:
+                update_fields.append("quantity = %s")
+                update_values.append(int(quantity))
+            if expire_date:
+                update_fields.append("expire_date = %s")
+                update_values.append(expire_date)
+
+            update_values.append(category_id)
+
+            if update_fields:
+                query = f"UPDATE PRODUCT SET {', '.join(update_fields)} WHERE category_id = %s"
+                cursor.execute(query, update_values)
+                conn.commit()
+                print("Product updated successfully")
+            else:
+                print("No updates provided")
+    except Exception as e:
+        print('Error occurred while updating product:', e)
+    finally:
+        conn.close()
+
 
 def specific_items_discounted(amount_percentage_from_user, specific_items_id):
     try:
