@@ -3,12 +3,14 @@ from enum import Enum
 import jwt
 import bcrypt
 import datetime
+import platform
 import os
 from dotenv import load_dotenv
 from pathlib import Path
 from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage, Frame, Label, messagebox
-from ctypes import windll
-windll.shcore.SetProcessDpiAwareness(1)
+if platform.system == "Windows":
+    from ctypes import windll
+    windll.shcore.SetProcessDpiAwareness(1)
 
 
 load_dotenv()
