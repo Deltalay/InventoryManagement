@@ -90,11 +90,22 @@ def create_account(username, password):
     cursor.execute("SELECT * FROM users WHERE id=%s LIMIT 1", (admin_id))
     result = cursor.fetchone()
     if result["role"] == Role.Admin.value:
-        salth = bcrypt.gensalt()
-        hashpassword = bcrypt.hashpw(password=password, salt=salth)
         try:
             cursor.execute(
-                "INSERT INTO users(username, password) values(%s, %s)", (username, hashpassword))
+                "SELECT * FROM users WHERE username=%s LIMIT 1", (username)
+            )
+            checking = cursor.fetchone()
+            if checking == None:
+                salth = bcrypt.gensalt()
+                
+                hashpassword = bcrypt.hashpw(password=password.encode('utf-8'), salt=salth)
+                cursor.execute(
+                    "INSERT INTO users(username, password) values(%s, %s)", (username, hashpassword))
+                connection.commit()
+            else:
+                return {
+                    "error": "User already exist!"
+                }
         except Exception as e:
             print(e)
             return False
@@ -400,12 +411,15 @@ class Admin(Canvas):
             79.0,
             fill="#82FB7C",
             outline="")
-
+        openFile = open("token", "r")
+        token = openFile.read()
+        verify_token = jwt.decode(token, os.getenv("SECRET"), algorithms="HS256")
+        nameuser = verify_token["username"]
         canvas.create_text(
             35.0,
             28.0,
             anchor="nw",
-            text="Welcome back,",
+            text="Welcome back, " + nameuser ,
             fill="#000000",
             font=("Inter Bold", 20 * -1)
         )
@@ -1085,7 +1099,8 @@ class Create(Canvas):
             bd=0,
             bg="#FFFFFF",
             fg="#000716",
-            highlightthickness=0
+            highlightthickness=0,
+            show="*"
         )
         entry_1.place(
             x=31.0,
@@ -1114,6 +1129,7 @@ class Create(Canvas):
             bd=0,
             bg="#FFFFFF",
             fg="#000716",
+            show="*",
             highlightthickness=0
         )
         entry_2.place(
@@ -1172,11 +1188,33 @@ class Create(Canvas):
 
         self.button_image_1 = PhotoImage(
             file=self.relative_to_assets("button_1.png"))
+
+        def create_account_():
+            password = entry_1.get()
+            confirm_password = entry_2.get()
+            username = entry_3.get()
+            if password != confirm_password:
+                return messagebox.showerror(title="Error",
+                                            message="Your confirm password and password is not the same please check again.")
+            testingCreate = create_account(
+                username=username, password=password)
+            if type(testingCreate) is dict and testingCreate["error"]:
+                return messagebox.showerror(title="Error",
+                                            message=testingCreate["error"])
+            if (isinstance(testingCreate, bool) and testingCreate == False):
+                messagebox.showerror(title="Something went wrong",
+                                     message="Well you have to debug your code to find this error.")
+            if isinstance(testingCreate, bool) and testingCreate == True:
+                is_admin = isadmin(username=username)
+                if is_admin:
+                    self.parent.switch_to_admin()
+                else:
+                    self.parent.switch_to_employee()
         button_1 = Button(
             image=self.button_image_1,
             borderwidth=0,
             highlightthickness=0,
-            command=lambda: print("button_1 clicked"),
+            command=create_account_,
             relief="flat"
         )
         button_1.place(
@@ -1188,6 +1226,7 @@ class Create(Canvas):
 
         self.button_image_2 = PhotoImage(
             file=self.relative_to_assets("button_2.png"))
+
         def cancel_creation():
             self.parent.switch_to_admin()
         button_2 = Button(
@@ -1235,12 +1274,15 @@ class Employee(Canvas):
             79.0,
             fill="#82FB7C",
             outline="")
-
+        openFile = open("token", "r")
+        token = openFile.read()
+        verify_token = jwt.decode(token, os.getenv("SECRET"), algorithms="HS256")
+        nameuser = verify_token["username"]
         canvas.create_text(
             35.0,
             28.0,
             anchor="nw",
-            text="Welcome back,",
+            text="Welcome back, " + nameuser,
             fill="#000000",
             font=("Inter Bold", 20 * -1)
         )
