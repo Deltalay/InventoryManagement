@@ -327,6 +327,16 @@ def set_global_discount(discount_amount):
     discount_global = int(discount_amount)
 
 
+def select_all_item():
+    try:
+        cursor.execute("SELECT * FROM items")
+        result = cursor.fetchall()
+        return result
+    except Exception as e:
+        print(e)
+        return False
+
+
 if __name__ == "__main__":
     load_dotenv()
     connection = None
