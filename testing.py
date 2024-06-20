@@ -402,7 +402,7 @@ class Admin(Canvas):
             highlightthickness=0,
             relief="ridge"
         )
-
+   
         canvas.place(x=0, y=0)
         canvas.create_rectangle(
             0.0,
@@ -445,6 +445,19 @@ class Admin(Canvas):
             fg="#000716",
             highlightthickness=0
         )
+        entry_1.insert(0, "Search")
+        def on_enter(e):
+            if entry_1.get() == "Search":
+                entry_1.delete(0, 'end')
+
+        def on_leave(e):
+            name = entry_1.get()
+            if name == "":
+                entry_1.insert(0, "Search")
+        entry_1.bind('<FocusIn>', on_enter)
+        entry_1.bind('<FocusOut>', on_leave)
+        def search():
+            search_query = entry_1.get()
         entry_1.place(
             x=426.0,
             y=18.0,
@@ -458,7 +471,7 @@ class Admin(Canvas):
             image=self.button_image_1,
             borderwidth=0,
             highlightthickness=0,
-            command=lambda: print("button_1 clicked"),
+            command=lambda: print(entry_1.get()),
             relief="flat"
         )
         button_1.place(
