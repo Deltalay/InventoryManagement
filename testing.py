@@ -99,8 +99,9 @@ def create_account(username, password):
             checking = cursor.fetchone()
             if checking == None:
                 salth = bcrypt.gensalt()
-                
-                hashpassword = bcrypt.hashpw(password=password.encode('utf-8'), salt=salth)
+
+                hashpassword = bcrypt.hashpw(
+                    password=password.encode('utf-8'), salt=salth)
                 cursor.execute(
                     "INSERT INTO users(username, password) values(%s, %s)", (username, hashpassword))
                 connection.commit()
@@ -116,6 +117,16 @@ def create_account(username, password):
     else:
         print("Sorry you are not an admin")
         return
+
+
+def select_all_item():
+    try:
+        cursor.execute("SELECT * FROM items")
+        result = cursor.fetchall()
+        return result
+    except Exception as e:
+        print(e)
+        return False
 
 
 def search_items(itemName):
@@ -387,7 +398,7 @@ class Admin(Canvas):
     def relative_to_assets(self, path: str) -> Path:
         OUTPUT_PATH = Path(__file__).parent
         ASSETS_PATH = OUTPUT_PATH / \
-            Path(r"D:\school\InventoryManagement\assets\frame3")
+            Path(r"/home/delta/Desktop/utilities/python/InventoryManagement/assets/frame3")
         return ASSETS_PATH / Path(path)
 
     def __init__(self, parent: TkinterApp):
@@ -404,7 +415,7 @@ class Admin(Canvas):
             highlightthickness=0,
             relief="ridge"
         )
-   
+
         canvas.place(x=0, y=0)
         canvas.create_rectangle(
             0.0,
@@ -415,13 +426,14 @@ class Admin(Canvas):
             outline="")
         openFile = open("token", "r")
         token = openFile.read()
-        verify_token = jwt.decode(token, os.getenv("SECRET"), algorithms="HS256")
+        verify_token = jwt.decode(
+            token, os.getenv("SECRET"), algorithms="HS256")
         nameuser = verify_token["username"]
         canvas.create_text(
             35.0,
             28.0,
             anchor="nw",
-            text="Welcome back, " + nameuser ,
+            text="Welcome back, " + nameuser,
             fill="#000000",
             font=("Inter Bold", 20 * -1)
         )
@@ -434,33 +446,28 @@ class Admin(Canvas):
             fill="#FFFFFF",
             outline="")
 
-        self.entry_image_1 = PhotoImage(
-            file=self.relative_to_assets("entry_1.png"))
-        entry_bg_1 = canvas.create_image(
-            569.0,
-            39.5,
-            image=self.entry_image_1
-        )
-        entry_1 = Entry(
+        Search_entry = Entry(
             bd=0,
             bg="#FFFFFF",
             fg="#000716",
             highlightthickness=0
         )
-        entry_1.insert(0, "Search")
+        Search_entry.insert(0, "Search")
+
         def on_enter(e):
-            if entry_1.get() == "Search":
-                entry_1.delete(0, 'end')
+            if Search_entry.get() == "Search":
+                Search_entry.delete(0, 'end')
 
         def on_leave(e):
-            name = entry_1.get()
+            name = Search_entry.get()
             if name == "":
-                entry_1.insert(0, "Search")
-        entry_1.bind('<FocusIn>', on_enter)
-        entry_1.bind('<FocusOut>', on_leave)
+                Search_entry.insert(0, "Search")
+        Search_entry.bind('<FocusIn>', on_enter)
+        Search_entry.bind('<FocusOut>', on_leave)
+
         def search():
-            search_query = entry_1.get()
-        entry_1.place(
+            search_query = Search_entry.get()
+        Search_entry.place(
             x=426.0,
             y=18.0,
             width=286.0,
@@ -473,7 +480,7 @@ class Admin(Canvas):
             image=self.button_image_1,
             borderwidth=0,
             highlightthickness=0,
-            command=lambda: print(entry_1.get()),
+            command=lambda: print(Search_entry.get()),
             relief="flat"
         )
         button_1.place(
@@ -499,15 +506,6 @@ class Admin(Canvas):
             height=33.0
         )
 
-        canvas.create_text(
-            35.0,
-            107.0,
-            anchor="nw",
-            text="All Items: 100",
-            fill="#000000",
-            font=("Inter Medium", 16 * -1)
-        )
-
         canvas.create_rectangle(
             35.0,
             150.0,
@@ -515,106 +513,6 @@ class Admin(Canvas):
             577.0,
             fill="#FFFFFF",
             outline="")
-
-        self.entry_image_2 = PhotoImage(
-            file=self.relative_to_assets("entry_2.png"))
-        entry_bg_2 = canvas.create_image(
-            132.5,
-            218.5,
-            image=self.entry_image_2
-        )
-        entry_2 = Entry(
-            bd=0,
-            bg="#FF0000",
-            fg="#000716",
-            highlightthickness=0
-        )
-        entry_2.place(
-            x=48.0,
-            y=197.0,
-            width=169.0,
-            height=41.0
-        )
-
-        self.entry_image_3 = PhotoImage(
-            file=self.relative_to_assets("entry_3.png"))
-        entry_bg_3 = canvas.create_image(
-            533.0,
-            218.5,
-            image=self.entry_image_3
-        )
-        entry_3 = Entry(
-            bd=0,
-            bg="#000AFF",
-            fg="#000716",
-            highlightthickness=0
-        )
-        entry_3.place(
-            x=497.0,
-            y=197.0,
-            width=72.0,
-            height=41.0
-        )
-
-        self.entry_image_4 = PhotoImage(
-            file=self.relative_to_assets("entry_4.png"))
-        entry_bg_4 = canvas.create_image(
-            608.0,
-            218.5,
-            image=self.entry_image_4
-        )
-        entry_4 = Entry(
-            bd=0,
-            bg="#8AFC8F",
-            fg="#000716",
-            highlightthickness=0
-        )
-        entry_4.place(
-            x=569.0,
-            y=197.0,
-            width=78.0,
-            height=41.0
-        )
-
-        self.entry_image_5 = PhotoImage(
-            file=self.relative_to_assets("entry_5.png"))
-        entry_bg_5 = canvas.create_image(
-            713.5,
-            218.5,
-            image=self.entry_image_5
-        )
-        entry_5 = Entry(
-            bd=0,
-            bg="#FFEA2D",
-            fg="#000716",
-            highlightthickness=0
-        )
-        entry_5.place(
-            x=647.0,
-            y=197.0,
-            width=133.0,
-            height=41.0
-        )
-
-        self.entry_image_6 = PhotoImage(
-            file=self.relative_to_assets("entry_6.png"))
-        entry_bg_6 = canvas.create_image(
-            357.0,
-            218.5,
-            image=self.entry_image_6
-        )
-        entry_6 = Entry(
-            bd=0,
-            bg="#C931FF",
-            fg="#000716",
-            highlightthickness=0
-        )
-        entry_6.place(
-            x=217.0,
-            y=197.0,
-            width=280.0,
-            height=41.0
-        )
 
         canvas.create_rectangle(
             35.0,
@@ -669,233 +567,102 @@ class Admin(Canvas):
             font=("Inter Bold", 14 * -1)
         )
 
-        self.button_image_3 = PhotoImage(
-            file=self.relative_to_assets("button_3.png"))
-        button_3 = Button(
-            image=self.button_image_3,
-            borderwidth=0,
-            highlightthickness=0,
-            command=lambda: print("button_3 clicked"),
-            relief="flat"
-        )
-        button_3.place(
-            x=799.0,
-            y=202.0,
-            width=33.0,
-            height=33.0
-        )
+        item_select_all = select_all_item()
 
-        self.entry_image_7 = PhotoImage(
-            file=self.relative_to_assets("entry_7.png"))
-        entry_bg_7 = canvas.create_image(
-            132.5,
-            218.5,
-            image=self.entry_image_7
+        canvas.create_text(
+            35.0,
+            107.0,
+            anchor="nw",
+            text="All Items: " + str(len(item_select_all)),
+            fill="#000000",
+            font=("Inter Medium", 16 * -1)
         )
-        entry_7 = Entry(
-            bd=0,
-            bg="#FF0000",
-            fg="#000716",
-            highlightthickness=0
-        )
-        entry_7.place(
-            x=48.0,
-            y=197.0,
-            width=169.0,
-            height=41.0
-        )
+        for index, i in enumerate(item_select_all):
+            item_name = Entry(
+                bd=0,
 
-        self.entry_image_8 = PhotoImage(
-            file=self.relative_to_assets("entry_8.png"))
-        entry_bg_8 = canvas.create_image(
-            533.0,
-            218.5,
-            image=self.entry_image_8
-        )
-        entry_8 = Entry(
-            bd=0,
-            bg="#000AFF",
-            fg="#000716",
-            highlightthickness=0
-        )
-        entry_8.place(
-            x=497.0,
-            y=197.0,
-            width=72.0,
-            height=41.0
-        )
+                fg="#000716",
+                highlightthickness=0
+            )
+            item_name.insert(0, i['name'])
+            item_name.place(
+                x=48.0,
+                y=197.0 + (index * 43),
+                width=169.0,
+                height=41.0
+            )
+            description = Entry(
+                bd=0,
 
-        self.entry_image_9 = PhotoImage(
-            file=self.relative_to_assets("entry_9.png"))
-        entry_bg_9 = canvas.create_image(
-            713.5,
-            218.5,
-            image=self.entry_image_9
-        )
-        entry_9 = Entry(
-            bd=0,
-            bg="#FFEA2D",
-            fg="#000716",
-            highlightthickness=0
-        )
-        entry_9.place(
-            x=647.0,
-            y=197.0,
-            width=133.0,
-            height=41.0
-        )
+                fg="#000716",
+                highlightthickness=0
+            )
+            description.insert(0, i['description'])
+            description.place(
+                x=217.0,
+                y=197.0 + (index * 43),
+                width=280.0,
+                height=41.0
+            )
+            quantity = Entry(
+                bd=0,
 
-        self.entry_image_10 = PhotoImage(
-            file=self.relative_to_assets("entry_10.png"))
-        entry_bg_10 = canvas.create_image(
-            357.0,
-            218.5,
-            image=self.entry_image_10
-        )
-        entry_10 = Entry(
-            bd=0,
-            bg="#C931FF",
-            fg="#000716",
-            highlightthickness=0
-        )
-        entry_10.place(
-            x=217.0,
-            y=197.0,
-            width=280.0,
-            height=41.0
-        )
+                fg="#000716",
+                highlightthickness=0
+            )
+            quantity.insert(0, i["quantity"])
+            quantity.place(
+                x=497.0,
+                y=197.0 + (index * 43),
+                width=72.0,
+                height=41.0
+            )
+            price = Entry(
+                bd=0,
 
-        self.button_image_4 = PhotoImage(
-            file=self.relative_to_assets("button_4.png"))
-        button_4 = Button(
-            image=self.button_image_4,
-            borderwidth=0,
-            highlightthickness=0,
-            command=lambda: print("button_4 clicked"),
-            relief="flat"
-        )
-        button_4.place(
-            x=799.0,
-            y=202.0,
-            width=33.0,
-            height=33.0
-        )
+                fg="#000716",
+                highlightthickness=0
+            )
+            price.insert(0, str(i["price"]) + "$")
+            price.place(
+                x=569.0,
+                y=197.0 + (index * 43),
+                width=78.0,
+                height=41.0
+            )
+            expireDate = Entry(
+                bd=0,
 
-        self.entry_image_11 = PhotoImage(
-            file=self.relative_to_assets("entry_11.png"))
-        entry_bg_11 = canvas.create_image(
-            608.0,
-            261.5,
-            image=self.entry_image_11
-        )
-        entry_11 = Entry(
-            bd=0,
-            bg="#267429",
-            fg="#000716",
-            highlightthickness=0
-        )
-        entry_11.place(
-            x=569.0,
-            y=240.0,
-            width=78.0,
-            height=41.0
-        )
+                fg="#000716",
+                highlightthickness=0
+            )
+            expireDate.insert(0, i["expire_date"].strftime('%Y-%m-%d'))
+            expireDate.place(
+                x=647.0,
+                y=197.0 + (index * 43),
+                width=133.0,
+                height=41.0
+            )
+            button_image_4 = PhotoImage(
+                file=self.relative_to_assets("button_4.png"))
 
-        self.entry_image_12 = PhotoImage(
-            file=self.relative_to_assets("entry_12.png"))
-        entry_bg_12 = canvas.create_image(
-            132.5,
-            261.5,
-            image=self.entry_image_12
-        )
-        entry_12 = Entry(
-            bd=0,
-            bg="#FF0000",
-            fg="#000716",
-            highlightthickness=0
-        )
-        entry_12.place(
-            x=48.0,
-            y=240.0,
-            width=169.0,
-            height=41.0
-        )
-
-        self.entry_image_13 = PhotoImage(
-            file=self.relative_to_assets("entry_13.png"))
-        entry_bg_13 = canvas.create_image(
-            533.0,
-            261.5,
-            image=self.entry_image_13
-        )
-        entry_13 = Entry(
-            bd=0,
-            bg="#14187F",
-            fg="#000716",
-            highlightthickness=0
-        )
-        entry_13.place(
-            x=497.0,
-            y=240.0,
-            width=72.0,
-            height=41.0
-        )
-
-        self.entry_image_14 = PhotoImage(
-            file=self.relative_to_assets("entry_14.png"))
-        entry_bg_14 = canvas.create_image(
-            713.5,
-            261.5,
-            image=self.entry_image_14
-        )
-        entry_14 = Entry(
-            bd=0,
-            bg="#7F7411",
-            fg="#000716",
-            highlightthickness=0
-        )
-        entry_14.place(
-            x=647.0,
-            y=240.0,
-            width=133.0,
-            height=41.0
-        )
-
-        self.entry_image_15 = PhotoImage(
-            file=self.relative_to_assets("entry_15.png"))
-        entry_bg_15 = canvas.create_image(
-            357.0,
-            261.5,
-            image=self.entry_image_15
-        )
-        entry_15 = Entry(
-            bd=0,
-            bg="#73009B",
-            fg="#000716",
-            highlightthickness=0
-        )
-        entry_15.place(
-            x=217.0,
-            y=240.0,
-            width=280.0,
-            height=41.0
-        )
-
-        self.button_image_5 = PhotoImage(
-            file=self.relative_to_assets("button_5.png"))
-        button_5 = Button(
-            image=self.button_image_5,
-            borderwidth=0,
-            highlightthickness=0,
-            command=lambda: print("button_5 clicked"),
-            relief="flat"
-        )
-        button_5.place(
-            x=799.0,
-            y=245.0,
-            width=33.0,
-            height=33.0
-        )
+            def delete_stuff():
+                print(
+                    "Entry9: ")
+            button_4 = Button(
+                image=button_image_4,
+                borderwidth=0,
+                highlightthickness=0,
+                command=delete_stuff,
+                relief="flat",
+            )
+            button_4.image = button_image_4
+            button_4.place(
+                x=799.0,
+                y=202.0 + (index * 43),
+                width=33.0,
+                height=33.0
+            )
 
         self.button_image_6 = PhotoImage(
             file=self.relative_to_assets("button_6.png"))
@@ -931,7 +698,7 @@ class Login(Canvas):
     def relative_to_assets(self, path: str) -> Path:
         OUTPUT_PATH = Path(__file__).parent
         ASSETS_PATH = OUTPUT_PATH / \
-            Path(r"D:\school\InventoryManagement\assets\frame0")
+            Path(r"/home/delta/Desktop/utilities/python/InventoryManagement/assets/frame0")
         return ASSETS_PATH / Path(path)
 
     def __init__(self, parent: TkinterApp):
@@ -1070,7 +837,7 @@ class Create(Canvas):
     def relative_to_assets(self, path: str) -> Path:
         OUTPUT_PATH = Path(__file__).parent
         ASSETS_PATH = OUTPUT_PATH / \
-            Path(r"D:\school\Tkinter-Designer\build\assets\frame1")
+            Path(r"/home/delta/Desktop/utilities/python/InventoryManagement/assets/frame1")
         return ASSETS_PATH / Path(path)
 
     def __init__(self, parent: TkinterApp):
@@ -1263,7 +1030,7 @@ class Employee(Canvas):
     def relative_to_assets(self, path: str) -> Path:
         OUTPUT_PATH = Path(__file__).parent
         ASSETS_PATH = OUTPUT_PATH / \
-            Path(r"D:\school\Tkinter-Designer\build\assets\frame2")
+            Path(r"/home/delta/Desktop/utilities/python/InventoryManagement/assets/frame2")
         return ASSETS_PATH / Path(path)
 
     def __init__(self, parent: TkinterApp):
@@ -1291,7 +1058,8 @@ class Employee(Canvas):
             outline="")
         openFile = open("token", "r")
         token = openFile.read()
-        verify_token = jwt.decode(token, os.getenv("SECRET"), algorithms="HS256")
+        verify_token = jwt.decode(
+            token, os.getenv("SECRET"), algorithms="HS256")
         nameuser = verify_token["username"]
         canvas.create_text(
             35.0,
@@ -1361,16 +1129,6 @@ class Employee(Canvas):
             width=33.0,
             height=33.0
         )
-
-        canvas.create_text(
-            35.0,
-            107.0,
-            anchor="nw",
-            text="All Items: 100",
-            fill="#000000",
-            font=("Inter Medium", 16 * -1)
-        )
-
         canvas.create_rectangle(
             35.0,
             150.0,
@@ -1378,86 +1136,6 @@ class Employee(Canvas):
             577.0,
             fill="#FFFFFF",
             outline="")
-
-        self.entry_image_2 = PhotoImage(
-            file=self.relative_to_assets("entry_2.png"))
-        entry_bg_2 = canvas.create_image(
-            132.5,
-            218.5,
-            image=self.entry_image_2
-        )
-        entry_2 = Entry(
-            bd=0,
-            bg="#FF0000",
-            fg="#000716",
-            highlightthickness=0
-        )
-        entry_2.place(
-            x=48.0,
-            y=197.0,
-            width=169.0,
-            height=41.0
-        )
-
-        self.entry_image_3 = PhotoImage(
-            file=self.relative_to_assets("entry_3.png"))
-        entry_bg_3 = canvas.create_image(
-            608.0,
-            218.5,
-            image=self.entry_image_3
-        )
-        entry_3 = Entry(
-            bd=0,
-            bg="#8AFC8F",
-            fg="#000716",
-            highlightthickness=0
-        )
-        entry_3.place(
-            x=569.0,
-            y=197.0,
-            width=78.0,
-            height=41.0
-        )
-
-        self.entry_image_4 = PhotoImage(
-            file=self.relative_to_assets("entry_4.png"))
-        entry_bg_4 = canvas.create_image(
-            713.5,
-            218.5,
-            image=self.entry_image_4
-        )
-        entry_4 = Entry(
-            bd=0,
-            bg="#FFEA2D",
-            fg="#000716",
-            highlightthickness=0
-        )
-        entry_4.place(
-            x=647.0,
-            y=197.0,
-            width=133.0,
-            height=41.0
-        )
-
-        self.entry_image_5 = PhotoImage(
-            file=self.relative_to_assets("entry_5.png"))
-        entry_bg_5 = canvas.create_image(
-            357.0,
-            218.5,
-            image=self.entry_image_5
-        )
-        entry_5 = Entry(
-            bd=0,
-            bg="#C931FF",
-            fg="#000716",
-            highlightthickness=0
-        )
-        entry_5.place(
-            x=217.0,
-            y=197.0,
-            width=280.0,
-            height=41.0
-        )
 
         canvas.create_rectangle(
             35.0,
@@ -1512,193 +1190,102 @@ class Employee(Canvas):
             font=("Inter Bold", 14 * -1)
         )
 
-        self.button_image_3 = PhotoImage(
-            file=self.relative_to_assets("button_3.png"))
-        button_3 = Button(
-            image=self.button_image_3,
-            borderwidth=0,
-            highlightthickness=0,
-            command=lambda: print("button_3 clicked"),
-            relief="flat"
-        )
-        button_3.place(
-            x=799.0,
-            y=202.0,
-            width=33.0,
-            height=33.0
-        )
+        item_select_all = select_all_item()
 
-        self.entry_image_6 = PhotoImage(
-            file=self.relative_to_assets("entry_6.png"))
-        entry_bg_6 = canvas.create_image(
-            132.5,
-            218.5,
-            image=self.entry_image_6
+        canvas.create_text(
+            35.0,
+            107.0,
+            anchor="nw",
+            text="All Items: " + str(len(item_select_all)),
+            fill="#000000",
+            font=("Inter Medium", 16 * -1)
         )
-        entry_6 = Entry(
-            bd=0,
-            bg="#FF0000",
-            fg="#000716",
-            highlightthickness=0
-        )
-        entry_6.place(
-            x=48.0,
-            y=197.0,
-            width=169.0,
-            height=41.0
-        )
+        for index, i in enumerate(item_select_all):
+            item_name = Entry(
+                bd=0,
 
-        self.entry_image_7 = PhotoImage(
-            file=self.relative_to_assets("entry_7.png"))
-        entry_bg_7 = canvas.create_image(
-            713.5,
-            218.5,
-            image=self.entry_image_7
-        )
-        entry_7 = Entry(
-            bd=0,
-            bg="#FFEA2D",
-            fg="#000716",
-            highlightthickness=0
-        )
-        entry_7.place(
-            x=647.0,
-            y=197.0,
-            width=133.0,
-            height=41.0
-        )
+                fg="#000716",
+                highlightthickness=0
+            )
+            item_name.insert(0, i['name'])
+            item_name.place(
+                x=48.0,
+                y=197.0 + (index * 43),
+                width=169.0,
+                height=41.0
+            )
+            description = Entry(
+                bd=0,
 
-        self.entry_image_8 = PhotoImage(
-            file=self.relative_to_assets("entry_8.png"))
-        entry_bg_8 = canvas.create_image(
-            357.0,
-            218.5,
-            image=self.entry_image_8
-        )
-        entry_8 = Entry(
-            bd=0,
-            bg="#C931FF",
-            fg="#000716",
-            highlightthickness=0
-        )
-        entry_8.place(
-            x=217.0,
-            y=197.0,
-            width=280.0,
-            height=41.0
-        )
+                fg="#000716",
+                highlightthickness=0
+            )
+            description.insert(0, i['description'])
+            description.place(
+                x=217.0,
+                y=197.0 + (index * 43),
+                width=280.0,
+                height=41.0
+            )
+            quantity = Entry(
+                bd=0,
 
-        self.button_image_4 = PhotoImage(
-            file=self.relative_to_assets("button_4.png"))
-        button_4 = Button(
-            image=self.button_image_4,
-            borderwidth=0,
-            highlightthickness=0,
-            command=lambda: print("button_4 clicked"),
-            relief="flat"
-        )
-        button_4.place(
-            x=799.0,
-            y=202.0,
-            width=33.0,
-            height=33.0
-        )
+                fg="#000716",
+                highlightthickness=0
+            )
+            quantity.insert(0, i["quantity"])
+            quantity.place(
+                x=497.0,
+                y=197.0 + (index * 43),
+                width=72.0,
+                height=41.0
+            )
+            price = Entry(
+                bd=0,
 
-        self.entry_image_9 = PhotoImage(
-            file=self.relative_to_assets("entry_9.png"))
-        entry_bg_9 = canvas.create_image(
-            608.0,
-            261.5,
-            image=self.entry_image_9
-        )
-        entry_9 = Entry(
-            bd=0,
-            bg="#267429",
-            fg="#000716",
-            highlightthickness=0
-        )
-        entry_9.place(
-            x=569.0,
-            y=240.0,
-            width=78.0,
-            height=41.0
-        )
+                fg="#000716",
+                highlightthickness=0
+            )
+            price.insert(0, str(i["price"]) + "$")
+            price.place(
+                x=569.0,
+                y=197.0 + (index * 43),
+                width=78.0,
+                height=41.0
+            )
+            expireDate = Entry(
+                bd=0,
 
-        self.entry_image_10 = PhotoImage(
-            file=self.relative_to_assets("entry_10.png"))
-        entry_bg_10 = canvas.create_image(
-            132.5,
-            261.5,
-            image=self.entry_image_10
-        )
-        entry_10 = Entry(
-            bd=0,
-            bg="#FF0000",
-            fg="#000716",
-            highlightthickness=0
-        )
-        entry_10.place(
-            x=48.0,
-            y=240.0,
-            width=169.0,
-            height=41.0
-        )
+                fg="#000716",
+                highlightthickness=0
+            )
+            expireDate.insert(0, i["expire_date"].strftime('%Y-%m-%d'))
+            expireDate.place(
+                x=647.0,
+                y=197.0 + (index * 43),
+                width=133.0,
+                height=41.0
+            )
+            button_image_4 = PhotoImage(
+                file=self.relative_to_assets("button_4.png"))
 
-        self.entry_image_11 = PhotoImage(
-            file=self.relative_to_assets("entry_11.png"))
-        entry_bg_11 = canvas.create_image(
-            713.5,
-            261.5,
-            image=self.entry_image_11
-        )
-        entry_11 = Entry(
-            bd=0,
-            bg="#7F7411",
-            fg="#000716",
-            highlightthickness=0
-        )
-        entry_11.place(
-            x=647.0,
-            y=240.0,
-            width=133.0,
-            height=41.0
-        )
-
-        self.entry_image_12 = PhotoImage(
-            file=self.relative_to_assets("entry_12.png"))
-        entry_bg_12 = canvas.create_image(
-            357.0,
-            261.5,
-            image=self.entry_image_12
-        )
-        entry_12 = Entry(
-            bd=0,
-            bg="#73009B",
-            fg="#000716",
-            highlightthickness=0
-        )
-        entry_12.place(
-            x=217.0,
-            y=240.0,
-            width=280.0,
-            height=41.0
-        )
-
-        self.button_image_5 = PhotoImage(
-            file=self.relative_to_assets("button_5.png"))
-        button_5 = Button(
-            image=self.button_image_5,
-            borderwidth=0,
-            highlightthickness=0,
-            command=lambda: print("button_5 clicked"),
-            relief="flat"
-        )
-        button_5.place(
-            x=799.0,
-            y=245.0,
-            width=33.0,
-            height=33.0
-        )
+            def delete_stuff():
+                print(
+                    "Entry9: ")
+            button_4 = Button(
+                image=button_image_4,
+                borderwidth=0,
+                highlightthickness=0,
+                command=delete_stuff,
+                relief="flat",
+            )
+            button_4.image = button_image_4
+            button_4.place(
+                x=799.0,
+                y=202.0 + (index * 43),
+                width=33.0,
+                height=33.0
+            )
 
         canvas.create_text(
             510.0,
