@@ -143,7 +143,7 @@ def search_items(itemName):
         print('INPUT ERROR:', e)
 
 
-def add_item(item_name, item_description, item_price, item_stock, category_name, expires_date):
+def add_item(item_name, item_description, item_price, item_stock,  expires_date, category_name=None):
     openFile = open("token", "r")
     token = openFile.read()
     verify_token = jwt.decode(token, os.getenv("SECRET"), algorithms="HS256")
@@ -168,23 +168,61 @@ def add_item(item_name, item_description, item_price, item_stock, category_name,
         return {
             "error": "Please enter your stock"
         }
-    if len(category_name) <= 0:
-        return {
-            "error": "Invalid category"
-        }
-    date_format = "%Y-%m-%d %H:%M:%S"
+    date_format = "%Y-%m-%d"
     input_date = datetime.datetime.strptime(expires_date, date_format)
     current_date = datetime.datetime.now()
     if current_date > input_date:
         return {
             "error": "You cannot enter an expire item."
         }
-    categoryId = cursor.execute(
-        "SELECT * FROM category WHERE name=%s LIMIT 1", (category_name))
+
     result = cursor.fetchone()
     try:
-        cursor.execute(
-            "INSERT INTO items(category_id, name, description, price, quantity, expire_date) values(%s,%s,%s,%s,%s,%s)", (result["id"], item_name, item_description, int(item_price), int(item_stock), expires_date.replace(microsecond=0)))
+        if category_name != None:
+            categoryId = cursor.execute(
+                "SELECT * FROM category WHERE name=%s LIMIT 1", (category_name))
+            cursor.execute(
+                "INSERT INTO items(category_id, name, description, price, quantity, expire_date) values(%s,%s,%s,%s,%s,%s)", (result["id"], item_name, item_description, int(item_price), int(item_stock), expires_date))
+            connection.commit()
+        else:
+            cursor.execute(
+                "INSERT INTO items( name, description, price, quantity, expire_date) values(%s,%s,%s,%s,%s)", (item_name, item_description, int(item_price), int(item_stock), expires_date))
+            connection.commit()
+    except Exception as e:
+        print(e)
+        return False
+    else:
+        return True
+
+
+def update_item(item_name, description, price, quantity, expiredate):
+    if len(item_name) <= 0:
+        return {
+            "error": "Please enter your name"
+        }
+    if len(description) <= 0:
+        return {
+            "error": "Please enter your description"
+        }
+    if len(price) <= 0 and int(price) <= 0:
+        return {
+            "error": "Please enter your price"
+        }
+    if len(quantity) <= 0 and int(quantity) <= 0:
+        return {
+            "error": "Please enter your stock"
+        }
+    date_format = "%Y-%m-%d"
+    input_date = datetime.datetime.strptime(expiredate, date_format)
+    current_date = datetime.datetime.now()
+    if current_date > input_date:
+        return {
+            "error": "You cannot enter an expire item."
+        }
+    try:
+        cursor.execute("UPDATE items SET name=%s, description=%s, price=%s, quantity=%s, expire_date=%s WHERE name=%s",
+                       (item_name, description, float(price.rstrip("$")), int(quantity), expiredate, item_name))
+        connection.commit()
     except Exception as e:
         print(e)
         return False
@@ -492,19 +530,6 @@ class Admin(Canvas):
 
         self.button_image_2 = PhotoImage(
             file=self.relative_to_assets("button_2.png"))
-        button_2 = Button(
-            image=self.button_image_2,
-            borderwidth=0,
-            highlightthickness=0,
-            command=lambda: print("button_2 clicked"),
-            relief="flat"
-        )
-        button_2.place(
-            x=832.0,
-            y=107.0,
-            width=33.0,
-            height=33.0
-        )
 
         canvas.create_rectangle(
             35.0,
@@ -577,7 +602,119 @@ class Admin(Canvas):
             fill="#000000",
             font=("Inter Medium", 16 * -1)
         )
+        lastY = 0
+
+        def create_new_item():
+            item_name = Entry(
+                bd=0,
+
+                fg="#000716",
+                highlightthickness=0
+            )
+            item_name.focus_set()
+            item_name.place(
+                x=48.0,
+                y=lastY,
+                width=169.0,
+                height=41.0
+            )
+            description = Entry(
+                bd=0,
+
+                fg="#000716",
+                highlightthickness=0
+            )
+            description.place(
+                x=217.0,
+                y=lastY,
+                width=280.0,
+                height=41.0
+            )
+            quantity = Entry(
+                bd=0,
+
+                fg="#000716",
+                highlightthickness=0
+            )
+            quantity.place(
+                x=497.0,
+                y=lastY,
+                width=72.0,
+                height=41.0
+            )
+            price = Entry(
+                bd=0,
+
+                fg="#000716",
+                highlightthickness=0
+            )
+            price.place(
+                x=569.0,
+                y=lastY,
+                width=78.0,
+                height=41.0
+            )
+            expireDate = Entry(
+                bd=0,
+
+                fg="#000716",
+                highlightthickness=0
+            )
+            expireDate.place(
+                x=647.0,
+                y=lastY,
+                width=133.0,
+                height=41.0
+            )
+            button_image_4 = PhotoImage(
+                file=self.relative_to_assets("confirm.png"))
+
+            def button_click(item_name_widget, item_description_widget, quantity_widget, price_widget, expire_date_widget):
+
+                def on_click():
+                    item_content = item_name_widget.get()
+                    description_content = item_description_widget.get()
+                    quantity_content = quantity_widget.get()
+                    price_content = price_widget.get()
+                    expireDate_content = expire_date_widget.get()
+                    print(item_content, description_content,
+                          quantity_content, price_content, expireDate_content)
+                    add_item(item_content, description_content, price_content,
+                             quantity_content, expireDate_content)
+                    self.parent.switch_to_admin()
+                return on_click
+            button_4 = Button(
+                image=button_image_4,
+                borderwidth=0,
+                highlightthickness=0,
+                command=button_click(item_name, description,
+                                     quantity, price, expireDate),
+                relief="flat",
+            )
+            button_4.image = button_image_4
+            button_4.place(
+                x=799.0,
+                y=lastY + 5,
+                width=33.0,
+                height=33.0
+            )
+            print("Hello")
+        button_2 = Button(
+            image=self.button_image_2,
+            borderwidth=0,
+            highlightthickness=0,
+            command=create_new_item,
+            relief="flat"
+        )
+        button_2.place(
+            x=832.0,
+            y=107.0,
+            width=33.0,
+            height=33.0
+        )
+
         for index, i in enumerate(item_select_all):
+            lastY = 197 + (index * 43) + 43
             item_name = Entry(
                 bd=0,
 
@@ -646,19 +783,57 @@ class Admin(Canvas):
             button_image_4 = PhotoImage(
                 file=self.relative_to_assets("button_4.png"))
 
-            def delete_stuff():
-                print(
-                    "Entry9: ")
+            def button_click(entry_widget):
+
+                def on_click():
+                    entry_content = entry_widget.get()
+                    print(f"Entry content: {entry_content}")
+                    delete_items(entry_content)
+                    self.parent.switch_to_admin()
+                return on_click
+
             button_4 = Button(
                 image=button_image_4,
                 borderwidth=0,
                 highlightthickness=0,
-                command=delete_stuff,
+                command=button_click(item_name),
                 relief="flat",
             )
             button_4.image = button_image_4
             button_4.place(
-                x=799.0,
+                x=783.0,
+                y=202.0 + (index * 43),
+                width=33.0,
+                height=33.0
+            )
+
+            def update_item_data(item_name_widget, item_description_widget, quantity_widget, price_widget, expire_date_widget):
+
+                def on_click():
+                    item_content = item_name_widget.get()
+                    description_content = item_description_widget.get()
+                    quantity_content = quantity_widget.get()
+                    price_content = price_widget.get()
+                    expireDate_content = expire_date_widget.get()
+                    print(item_content, description_content,
+                          quantity_content, price_content, expireDate_content)
+                    update_item(item_content, description_content,
+                                price_content, quantity_content, expireDate_content)
+                    self.parent.switch_to_admin()
+                return on_click
+            button_image_5 = PhotoImage(
+                file=self.relative_to_assets("confirm.png"))
+            button_5 = Button(
+                image=button_image_5,
+                borderwidth=0,
+                highlightthickness=0,
+                command=update_item_data(
+                    item_name, description, quantity, price, expireDate),
+                relief="flat",
+            )
+            button_5.image = button_image_5
+            button_5.place(
+                x=816.0,
                 y=202.0 + (index * 43),
                 width=33.0,
                 height=33.0
@@ -1200,12 +1375,124 @@ class Employee(Canvas):
             fill="#000000",
             font=("Inter Medium", 16 * -1)
         )
-        for index, i in enumerate(item_select_all):
+
+        lastY = 0
+
+        def create_new_item():
             item_name = Entry(
                 bd=0,
 
                 fg="#000716",
                 highlightthickness=0
+            )
+            item_name.focus_set()
+            item_name.place(
+                x=48.0,
+                y=lastY,
+                width=169.0,
+                height=41.0
+            )
+            description = Entry(
+                bd=0,
+
+                fg="#000716",
+                highlightthickness=0
+            )
+            description.place(
+                x=217.0,
+                y=lastY,
+                width=280.0,
+                height=41.0
+            )
+            quantity = Entry(
+                bd=0,
+
+                fg="#000716",
+                highlightthickness=0
+            )
+            quantity.place(
+                x=497.0,
+                y=lastY,
+                width=72.0,
+                height=41.0
+            )
+            price = Entry(
+                bd=0,
+
+                fg="#000716",
+                highlightthickness=0
+            )
+            price.place(
+                x=569.0,
+                y=lastY,
+                width=78.0,
+                height=41.0
+            )
+            expireDate = Entry(
+                bd=0,
+
+                fg="#000716",
+                highlightthickness=0
+            )
+            expireDate.place(
+                x=647.0,
+                y=lastY,
+                width=133.0,
+                height=41.0
+            )
+            button_image_4 = PhotoImage(
+                file=self.relative_to_assets("confirm.png"))
+
+            def button_click(item_name_widget, item_description_widget, quantity_widget, price_widget, expire_date_widget):
+
+                def on_click():
+                    item_content = item_name_widget.get()
+                    description_content = item_description_widget.get()
+                    quantity_content = quantity_widget.get()
+                    price_content = price_widget.get()
+                    expireDate_content = expire_date_widget.get()
+                    print(item_content, description_content,
+                          quantity_content, price_content, expireDate_content)
+                    add_item(item_content, description_content, price_content,
+                             quantity_content, expireDate_content)
+                    self.parent.switch_to_admin()
+                return on_click
+            button_4 = Button(
+                image=button_image_4,
+                borderwidth=0,
+                highlightthickness=0,
+                command=button_click(item_name, description,
+                                     quantity, price, expireDate),
+                relief="flat",
+            )
+            button_4.image = button_image_4
+            button_4.place(
+                x=799.0,
+                y=lastY + 5,
+                width=33.0,
+                height=33.0
+            )
+            print("Hello")
+        button_2 = Button(
+            image=self.button_image_2,
+            borderwidth=0,
+            highlightthickness=0,
+            command=create_new_item,
+            relief="flat"
+        )
+        button_2.place(
+            x=832.0,
+            y=107.0,
+            width=33.0,
+            height=33.0
+        )
+        for index, i in enumerate(item_select_all):
+            lastY = 197 + (index * 43) + 43
+            item_name = Entry(
+                bd=0,
+
+                fg="#000716",
+                highlightthickness=0,
             )
             item_name.insert(0, i['name'])
             item_name.place(
@@ -1269,14 +1556,19 @@ class Employee(Canvas):
             button_image_4 = PhotoImage(
                 file=self.relative_to_assets("button_4.png"))
 
-            def delete_stuff():
-                print(
-                    "Entry9: ")
+            def button_click(entry_widget):
+
+                def on_click():
+                    entry_content = entry_widget.get()
+                    print(f"Entry content: {entry_content}")
+                    delete_items(entry_content)
+                    self.parent.switch_to_employee()
+                return on_click
             button_4 = Button(
                 image=button_image_4,
                 borderwidth=0,
                 highlightthickness=0,
-                command=delete_stuff,
+                command=button_click(item_name),
                 relief="flat",
             )
             button_4.image = button_image_4
