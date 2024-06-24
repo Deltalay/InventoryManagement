@@ -34,5 +34,4 @@ After create the virtual environemt and activate it we can install the neccessar
 pip install -r requirements.txt
 ```
 
-After that change `.env.example` to `.env` and place your database connection insde and put random string in `SECRET`. After you have finish it you can change the assets directory in the `main.py` file. 
-
+After that change `.env.example` to `.env` and place your database connection insde and put random string in `SECRET`. After you have finish it you can change the assets directory in the `main.py` file and don't forget to run the `database.sql`. Please note that in order to create admin account you have to insert your own account. We use bcrypt hash as our password hasher.
