@@ -505,6 +505,8 @@ class Admin(Canvas):
 
         def search():
             search_query = Search_entry.get()
+            result = search_items(search_query)
+            
         Search_entry.place(
             x=426.0,
             y=18.0,
