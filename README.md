@@ -34,4 +34,5 @@ After create the virtual environemt and activate it we can install the neccessar
 pip install -r requirements.txt
 ```
 
-After that change `.env.example` to `.env` and place your database connection insde.
+After that change `.env.example` to `.env` and place your database connection insde and put random string in `SECRET`. After you have finish it you can change the assets directory in the `main.py` file. 
+
