@@ -8,10 +8,10 @@ import os
 from dotenv import load_dotenv
 from pathlib import Path
 from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage, Frame, Label, messagebox
-if platform.system == "Windows":
+if platform.system() == "Windows":
     from ctypes import windll
     windll.shcore.SetProcessDpiAwareness(1)
-
+print(platform.system())
 
 load_dotenv()
 connection = None
@@ -423,6 +423,16 @@ class TkinterApp(Tk):
         self.clear()
         Employee(parent=self).pack(fill="both", expand="true")
 
+    def switch_to_admin_search(self, item_serach):
+        self.clear()
+        Admin_Search(parent=self, item_search=item_serach).pack(
+            fill="both", expand="true")
+
+    def switch_to_employee_search(self, item_serach):
+        self.clear()
+        Employee_Search(parent=self, item_search=item_serach).pack(
+            fill="both", expand="true")
+
     def switch_to_create(self):
         self.clear()
         Create(parent=self).pack(fill="both", expand="true")
@@ -432,11 +442,452 @@ class TkinterApp(Tk):
             widget.destroy()
 
 
+class Admin_Search(Canvas):
+
+    def relative_to_assets(self, path: str) -> Path:
+        OUTPUT_PATH = Path(__file__).parent
+        ASSETS_PATH = OUTPUT_PATH / \
+            Path(r"D:\school\InventoryManagement\assets\frame3")
+        return ASSETS_PATH / Path(path)
+
+    def __init__(self, parent: TkinterApp, item_search):
+        super(Admin_Search, self).__init__()
+        self.item_name_searchh = item_search
+        self.parent = parent
+
+        canvas = Canvas(
+            master=self,
+            bg="#FFFFFF",
+            height=600,
+            width=900,
+            bd=0,
+            highlightthickness=0,
+            relief="ridge"
+        )
+
+        canvas.place(x=0, y=0)
+        canvas.create_rectangle(
+            0.0,
+            0.0,
+            900.0,
+            79.0,
+            fill="#82FB7C",
+            outline="")
+        openFile = open("token", "r")
+        token = openFile.read()
+        verify_token = jwt.decode(
+            token, os.getenv("SECRET"), algorithms="HS256")
+        nameuser = verify_token["username"]
+        canvas.create_text(
+            35.0,
+            28.0,
+            anchor="nw",
+            text="Welcome back, " + nameuser,
+            fill="#000000",
+            font=("Inter Bold", 20 * -1)
+        )
+
+        canvas.create_rectangle(
+            0.0,
+            79.0,
+            900.0,
+            600.0,
+            fill="#FFFFFF",
+            outline="")
+
+        Search_entry = Entry(
+            bd=0,
+            bg="#FFFFFF",
+            fg="#000716",
+            highlightthickness=0
+        )
+        Search_entry.insert(0, "Search")
+
+        def on_enter(e):
+            if Search_entry.get() == "Search":
+                Search_entry.delete(0, 'end')
+
+        def on_leave(e):
+            name = Search_entry.get()
+            if name == "":
+                Search_entry.insert(0, "Search")
+        Search_entry.bind('<FocusIn>', on_enter)
+        Search_entry.bind('<FocusOut>', on_leave)
+
+        def search():
+            search_query = Search_entry.get()
+            if search_query == "":
+                self.parent.switch_to_admin()
+            else:
+                self.parent.switch_to_admin_search(search_query)
+
+        Search_entry.place(
+            x=426.0,
+            y=18.0,
+            width=286.0,
+            height=41.0
+        )
+
+        self.button_image_1 = PhotoImage(
+            file=self.relative_to_assets("button_1.png"))
+        button_1 = Button(
+            image=self.button_image_1,
+            borderwidth=0,
+            highlightthickness=0,
+            command=search,
+            relief="flat"
+        )
+        button_1.place(
+            x=712.0,
+            y=18.0,
+            width=43.0,
+            height=43.0
+        )
+
+        self.button_image_2 = PhotoImage(
+            file=self.relative_to_assets("button_2.png"))
+
+        canvas.create_rectangle(
+            35.0,
+            150.0,
+            867.0,
+            577.0,
+            fill="#FFFFFF",
+            outline="")
+
+        canvas.create_rectangle(
+            35.0,
+            150.0,
+            867.0,
+            187.0,
+            fill="#F5F5F5",
+            outline="")
+
+        canvas.create_text(
+            48.0,
+            156.0,
+            anchor="nw",
+            text="Item name",
+            fill="#000000",
+            font=("Inter Bold", 14 * -1)
+        )
+
+        canvas.create_text(
+            222.0,
+            156.0,
+            anchor="nw",
+            text="Item description",
+            fill="#000000",
+            font=("Inter Bold", 14 * -1)
+        )
+
+        canvas.create_text(
+            497.0,
+            156.0,
+            anchor="nw",
+            text="Quantity",
+            fill="#000000",
+            font=("Inter Bold", 14 * -1)
+        )
+
+        canvas.create_text(
+            575.0,
+            156.0,
+            anchor="nw",
+            text="Price",
+            fill="#000000",
+            font=("Inter Bold", 14 * -1)
+        )
+
+        canvas.create_text(
+            653.0,
+            156.0,
+            anchor="nw",
+            text="Expire dates",
+            fill="#000000",
+            font=("Inter Bold", 14 * -1)
+        )
+        item_select_all = search_items(self.item_name_searchh)
+        canvas.create_text(
+            35.0,
+            107.0,
+            anchor="nw",
+            text="All Items: " + str(len(item_select_all)),
+            fill="#000000",
+            font=("Inter Medium", 16 * -1)
+        )
+        lastY = 197
+
+        def create_new_item():
+            item_name = Entry(
+                bd=0,
+
+                fg="#000716",
+                highlightthickness=0
+            )
+            item_name.focus_set()
+            item_name.place(
+                x=48.0,
+                y=lastY,
+                width=169.0,
+                height=41.0
+            )
+            description = Entry(
+                bd=0,
+
+                fg="#000716",
+                highlightthickness=0
+            )
+            description.place(
+                x=217.0,
+                y=lastY,
+                width=280.0,
+                height=41.0
+            )
+            quantity = Entry(
+                bd=0,
+
+                fg="#000716",
+                highlightthickness=0
+            )
+            quantity.place(
+                x=497.0,
+                y=lastY,
+                width=72.0,
+                height=41.0
+            )
+            price = Entry(
+                bd=0,
+
+                fg="#000716",
+                highlightthickness=0
+            )
+            price.place(
+                x=569.0,
+                y=lastY,
+                width=78.0,
+                height=41.0
+            )
+            expireDate = Entry(
+                bd=0,
+
+                fg="#000716",
+                highlightthickness=0
+            )
+            expireDate.place(
+                x=647.0,
+                y=lastY,
+                width=133.0,
+                height=41.0
+            )
+            button_image_4 = PhotoImage(
+                file=self.relative_to_assets("confirm.png"))
+
+            def button_click(item_name_widget, item_description_widget, quantity_widget, price_widget, expire_date_widget):
+
+                def on_click():
+                    item_content = item_name_widget.get()
+                    description_content = item_description_widget.get()
+                    quantity_content = quantity_widget.get()
+                    price_content = price_widget.get()
+                    expireDate_content = expire_date_widget.get()
+                    print(item_content, description_content,
+                          quantity_content, price_content, expireDate_content)
+                    add_item(item_content, description_content, price_content,
+                             quantity_content, expireDate_content)
+                    self.parent.switch_to_admin()
+                return on_click
+            button_4 = Button(
+                image=button_image_4,
+                borderwidth=0,
+                highlightthickness=0,
+                command=button_click(item_name, description,
+                                     quantity, price, expireDate),
+                relief="flat",
+            )
+            button_4.image = button_image_4
+            button_4.place(
+                x=799.0,
+                y=lastY + 5,
+                width=33.0,
+                height=33.0
+            )
+            print("Hello")
+        button_2 = Button(
+            image=self.button_image_2,
+            borderwidth=0,
+            highlightthickness=0,
+            command=create_new_item,
+            relief="flat"
+        )
+        button_2.place(
+            x=832.0,
+            y=107.0,
+            width=33.0,
+            height=33.0
+        )
+
+        for index, i in enumerate(item_select_all):
+            lastY = 197 + (index * 43) + 43
+            item_name = Entry(
+                bd=0,
+
+                fg="#000716",
+                highlightthickness=0
+            )
+            item_name.insert(0, i['name'])
+            item_name.place(
+                x=48.0,
+                y=197.0 + (index * 43),
+                width=169.0,
+                height=41.0
+            )
+            description = Entry(
+                bd=0,
+
+                fg="#000716",
+                highlightthickness=0
+            )
+            description.insert(0, i['description'])
+            description.place(
+                x=217.0,
+                y=197.0 + (index * 43),
+                width=280.0,
+                height=41.0
+            )
+            quantity = Entry(
+                bd=0,
+
+                fg="#000716",
+                highlightthickness=0
+            )
+            quantity.insert(0, i["quantity"])
+            quantity.place(
+                x=497.0,
+                y=197.0 + (index * 43),
+                width=72.0,
+                height=41.0
+            )
+            price = Entry(
+                bd=0,
+
+                fg="#000716",
+                highlightthickness=0
+            )
+            price.insert(0, str(i["price"]) + "$")
+            price.place(
+                x=569.0,
+                y=197.0 + (index * 43),
+                width=78.0,
+                height=41.0
+            )
+            expireDate = Entry(
+                bd=0,
+
+                fg="#000716",
+                highlightthickness=0
+            )
+            expireDate.insert(0, i["expire_date"].strftime('%Y-%m-%d'))
+            expireDate.place(
+                x=647.0,
+                y=197.0 + (index * 43),
+                width=133.0,
+                height=41.0
+            )
+            button_image_4 = PhotoImage(
+                file=self.relative_to_assets("button_4.png"))
+
+            def button_click(entry_widget):
+
+                def on_click():
+                    entry_content = entry_widget.get()
+                    print(f"Entry content: {entry_content}")
+                    delete_items(entry_content)
+                    self.parent.switch_to_admin()
+                return on_click
+
+            button_4 = Button(
+                image=button_image_4,
+                borderwidth=0,
+                highlightthickness=0,
+                command=button_click(item_name),
+                relief="flat",
+            )
+            button_4.image = button_image_4
+            button_4.place(
+                x=783.0,
+                y=202.0 + (index * 43),
+                width=33.0,
+                height=33.0
+            )
+
+            def update_item_data(item_name_widget, item_description_widget, quantity_widget, price_widget, expire_date_widget):
+
+                def on_click():
+                    item_content = item_name_widget.get()
+                    description_content = item_description_widget.get()
+                    quantity_content = quantity_widget.get()
+                    price_content = price_widget.get()
+                    expireDate_content = expire_date_widget.get()
+                    print(item_content, description_content,
+                          quantity_content, price_content, expireDate_content)
+                    update_item(item_content, description_content,
+                                price_content, quantity_content, expireDate_content)
+                    self.parent.switch_to_admin()
+                return on_click
+            button_image_5 = PhotoImage(
+                file=self.relative_to_assets("confirm.png"))
+            button_5 = Button(
+                image=button_image_5,
+                borderwidth=0,
+                highlightthickness=0,
+                command=update_item_data(
+                    item_name, description, quantity, price, expireDate),
+                relief="flat",
+            )
+            button_5.image = button_image_5
+            button_5.place(
+                x=816.0,
+                y=202.0 + (index * 43),
+                width=33.0,
+                height=33.0
+            )
+
+        self.button_image_6 = PhotoImage(
+            file=self.relative_to_assets("button_6.png"))
+
+        def create_acc():
+            openFile = open("token", "r")
+            token = openFile.read()
+            verify_token = jwt.decode(
+                token, os.getenv("SECRET"), algorithms="HS256")
+            admin_id = verify_token['id']
+            cursor.execute(
+                "SELECT * FROM users WHERE id=%s LIMIT 1", (admin_id))
+            result = cursor.fetchone()
+            if result["role"] == Role.Admin.value:
+                self.parent.switch_to_create()
+
+        button_6 = Button(
+            image=self.button_image_6,
+            borderwidth=0,
+            highlightthickness=0,
+            command=create_acc,
+            relief="flat"
+        )
+        button_6.place(
+            x=765.0,
+            y=18.0,
+            width=102.0,
+            height=43.0
+        )
+
+
 class Admin(Canvas):
     def relative_to_assets(self, path: str) -> Path:
         OUTPUT_PATH = Path(__file__).parent
         ASSETS_PATH = OUTPUT_PATH / \
-            Path(r"/home/delta/Desktop/utilities/python/InventoryManagement/assets/frame3")
+            Path(r"D:\school\InventoryManagement\assets\frame3")
         return ASSETS_PATH / Path(path)
 
     def __init__(self, parent: TkinterApp):
@@ -505,8 +956,11 @@ class Admin(Canvas):
 
         def search():
             search_query = Search_entry.get()
-            result = search_items(search_query)
-            
+            if search_query == "":
+                self.parent.switch_to_admin()
+            else:
+                self.parent.switch_to_admin_search(search_query)
+
         Search_entry.place(
             x=426.0,
             y=18.0,
@@ -520,7 +974,7 @@ class Admin(Canvas):
             image=self.button_image_1,
             borderwidth=0,
             highlightthickness=0,
-            command=lambda: print(Search_entry.get()),
+            command=search,
             relief="flat"
         )
         button_1.place(
@@ -595,7 +1049,6 @@ class Admin(Canvas):
         )
 
         item_select_all = select_all_item()
-
         canvas.create_text(
             35.0,
             107.0,
@@ -604,7 +1057,7 @@ class Admin(Canvas):
             fill="#000000",
             font=("Inter Medium", 16 * -1)
         )
-        lastY = 0
+        lastY = 197
 
         def create_new_item():
             item_name = Entry(
@@ -875,7 +1328,7 @@ class Login(Canvas):
     def relative_to_assets(self, path: str) -> Path:
         OUTPUT_PATH = Path(__file__).parent
         ASSETS_PATH = OUTPUT_PATH / \
-            Path(r"/home/delta/Desktop/utilities/python/InventoryManagement/assets/frame0")
+            Path(r"D:\school\InventoryManagement\assets\frame0")
         return ASSETS_PATH / Path(path)
 
     def __init__(self, parent: TkinterApp):
@@ -1014,7 +1467,7 @@ class Create(Canvas):
     def relative_to_assets(self, path: str) -> Path:
         OUTPUT_PATH = Path(__file__).parent
         ASSETS_PATH = OUTPUT_PATH / \
-            Path(r"/home/delta/Desktop/utilities/python/InventoryManagement/assets/frame1")
+            Path(r"D:\school\InventoryManagement\assets\frame1")
         return ASSETS_PATH / Path(path)
 
     def __init__(self, parent: TkinterApp):
@@ -1165,10 +1618,7 @@ class Create(Canvas):
                                      message="Well you have to debug your code to find this error.")
             if isinstance(testingCreate, bool) and testingCreate == True:
                 is_admin = isadmin(username=username)
-                if is_admin:
-                    self.parent.switch_to_admin()
-                else:
-                    self.parent.switch_to_employee()
+                self.parent.switch_to_admin()
         button_1 = Button(
             image=self.button_image_1,
             borderwidth=0,
@@ -1207,7 +1657,7 @@ class Employee(Canvas):
     def relative_to_assets(self, path: str) -> Path:
         OUTPUT_PATH = Path(__file__).parent
         ASSETS_PATH = OUTPUT_PATH / \
-            Path(r"/home/delta/Desktop/utilities/python/InventoryManagement/assets/frame2")
+            Path(r"D:\school\InventoryManagement\assets\frame2")
         return ASSETS_PATH / Path(path)
 
     def __init__(self, parent: TkinterApp):
@@ -1277,20 +1727,29 @@ class Employee(Canvas):
 
         self.button_image_1 = PhotoImage(
             file=self.relative_to_assets("button_1.png"))
-        button_1 = Button(
+
+        def search():
+            search_query = entry_1.get()
+            if search_query == "":
+                self.parent.switch_to_employee()
+            else:
+                self.parent.switch_to_employee_search(search_query)
+
+        search_employee = Button(
             image=self.button_image_1,
             borderwidth=0,
             highlightthickness=0,
-            command=lambda: print("button_1 clicked"),
+            command=search,
             relief="flat"
         )
-        button_1.place(
+        search_employee.place(
             x=848.0,
             y=18.0,
             width=43.0,
             height=43.0
         )
 
+        
         self.button_image_2 = PhotoImage(
             file=self.relative_to_assets("button_2.png"))
         button_2 = Button(
@@ -1457,7 +1916,7 @@ class Employee(Canvas):
                           quantity_content, price_content, expireDate_content)
                     add_item(item_content, description_content, price_content,
                              quantity_content, expireDate_content)
-                    self.parent.switch_to_admin()
+                    self.parent.switch_to_employee()
                 return on_click
             button_4 = Button(
                 image=button_image_4,
@@ -1570,7 +2029,418 @@ class Employee(Canvas):
                           quantity_content, price_content, expireDate_content)
                     update_item(item_content, description_content,
                                 price_content, quantity_content, expireDate_content)
-                    self.parent.switch_to_admin()
+                    self.parent.switch_to_employee()
+                return on_click
+            button_4 = Button(
+                image=button_image_4,
+                borderwidth=0,
+                highlightthickness=0,
+                command=update_item_data(
+                    item_name, description, quantity, price, expireDate),
+                relief="flat",
+            )
+            button_4.image = button_image_4
+            button_4.place(
+                x=799.0,
+                y=202.0 + (index * 43),
+                width=33.0,
+                height=33.0
+            )
+
+        canvas.create_text(
+            510.0,
+            197.0,
+            anchor="nw",
+            text="23",
+            fill="#000000",
+            font=("Inter", 16 * -1)
+        )
+
+        canvas.create_text(
+            510.0,
+            240.0,
+            anchor="nw",
+            text="23",
+            fill="#000000",
+            font=("Inter", 16 * -1)
+        )
+
+
+class Employee_Search(Canvas):
+    def relative_to_assets(self, path: str) -> Path:
+        OUTPUT_PATH = Path(__file__).parent
+        ASSETS_PATH = OUTPUT_PATH / \
+            Path(r"D:\school\InventoryManagement\assets\frame2")
+        return ASSETS_PATH / Path(path)
+
+    def __init__(self, parent: TkinterApp, item_search):
+        super(Employee_Search, self).__init__()
+        self.item_search = item_search
+        self.parent = parent
+
+        canvas = Canvas(
+            master=self,
+            bg="#FFFFFF",
+            height=600,
+            width=900,
+            bd=0,
+            highlightthickness=0,
+            relief="ridge"
+        )
+
+        canvas.place(x=0, y=0)
+        canvas.create_rectangle(
+            0.0,
+            0.0,
+            900.0,
+            79.0,
+            fill="#82FB7C",
+            outline="")
+        openFile = open("token", "r")
+        token = openFile.read()
+        verify_token = jwt.decode(
+            token, os.getenv("SECRET"), algorithms="HS256")
+        nameuser = verify_token["username"]
+        canvas.create_text(
+            35.0,
+            28.0,
+            anchor="nw",
+            text="Welcome back, " + nameuser,
+            fill="#000000",
+            font=("Inter Bold", 20 * -1)
+        )
+
+        canvas.create_rectangle(
+            0.0,
+            79.0,
+            900.0,
+            600.0,
+            fill="#FFFFFF",
+            outline="")
+
+        self.entry_image_1 = PhotoImage(
+            file=self.relative_to_assets("entry_1.png"))
+        entry_bg_1 = canvas.create_image(
+            705.0,
+            39.5,
+            image=self.entry_image_1
+        )
+        entry_1 = Entry(
+            bd=0,
+            bg="#FFFFFF",
+            fg="#000716",
+            highlightthickness=0
+        )
+        entry_1.place(
+            x=562.0,
+            y=18.0,
+            width=286.0,
+            height=41.0
+        )
+        def search():
+            search_query = entry_1.get()
+            if search_query == "":
+                self.parent.switch_to_employee()
+            else:
+                self.parent.switch_to_employee_search(search_query)
+
+        self.button_image_1 = PhotoImage(
+            file=self.relative_to_assets("button_1.png"))
+        button_1 = Button(
+            image=self.button_image_1,
+            borderwidth=0,
+            highlightthickness=0,
+            command=search,
+            relief="flat"
+        )
+
+        button_1.place(
+            x=848.0,
+            y=18.0,
+            width=43.0,
+            height=43.0
+        )
+
+        self.button_image_2 = PhotoImage(
+            file=self.relative_to_assets("button_2.png"))
+        button_2 = Button(
+            image=self.button_image_2,
+            borderwidth=0,
+            highlightthickness=0,
+            command=lambda: print("button_2 clicked"),
+            relief="flat"
+        )
+        button_2.place(
+            x=832.0,
+            y=107.0,
+            width=33.0,
+            height=33.0
+        )
+        canvas.create_rectangle(
+            35.0,
+            150.0,
+            867.0,
+            577.0,
+            fill="#FFFFFF",
+            outline="")
+
+        canvas.create_rectangle(
+            35.0,
+            150.0,
+            867.0,
+            187.0,
+            fill="#F5F5F5",
+            outline="")
+
+        canvas.create_text(
+            48.0,
+            156.0,
+            anchor="nw",
+            text="Item name",
+            fill="#000000",
+            font=("Inter Bold", 14 * -1)
+        )
+
+        canvas.create_text(
+            222.0,
+            156.0,
+            anchor="nw",
+            text="Item description",
+            fill="#000000",
+            font=("Inter Bold", 14 * -1)
+        )
+
+        canvas.create_text(
+            497.0,
+            156.0,
+            anchor="nw",
+            text="Quantity",
+            fill="#000000",
+            font=("Inter Bold", 14 * -1)
+        )
+
+        canvas.create_text(
+            575.0,
+            156.0,
+            anchor="nw",
+            text="Price",
+            fill="#000000",
+            font=("Inter Bold", 14 * -1)
+        )
+
+        canvas.create_text(
+            653.0,
+            156.0,
+            anchor="nw",
+            text="Expire dates",
+            fill="#000000",
+            font=("Inter Bold", 14 * -1)
+        )
+
+        item_select_all = search_items(self.item_search)
+
+        canvas.create_text(
+            35.0,
+            107.0,
+            anchor="nw",
+            text="All Items: " + str(len(item_select_all)),
+            fill="#000000",
+            font=("Inter Medium", 16 * -1)
+        )
+
+        lastY = 0
+
+        def create_new_item():
+            item_name = Entry(
+                bd=0,
+
+                fg="#000716",
+                highlightthickness=0
+            )
+            item_name.focus_set()
+            item_name.place(
+                x=48.0,
+                y=lastY,
+                width=169.0,
+                height=41.0
+            )
+            description = Entry(
+                bd=0,
+
+                fg="#000716",
+                highlightthickness=0
+            )
+            description.place(
+                x=217.0,
+                y=lastY,
+                width=280.0,
+                height=41.0
+            )
+            quantity = Entry(
+                bd=0,
+
+                fg="#000716",
+                highlightthickness=0
+            )
+            quantity.place(
+                x=497.0,
+                y=lastY,
+                width=72.0,
+                height=41.0
+            )
+            price = Entry(
+                bd=0,
+
+                fg="#000716",
+                highlightthickness=0
+            )
+            price.place(
+                x=569.0,
+                y=lastY,
+                width=78.0,
+                height=41.0
+            )
+            expireDate = Entry(
+                bd=0,
+
+                fg="#000716",
+                highlightthickness=0
+            )
+            expireDate.place(
+                x=647.0,
+                y=lastY,
+                width=133.0,
+                height=41.0
+            )
+            button_image_4 = PhotoImage(
+                file=self.relative_to_assets("confirm.png"))
+
+            def button_click(item_name_widget, item_description_widget, quantity_widget, price_widget, expire_date_widget):
+
+                def on_click():
+                    item_content = item_name_widget.get()
+                    description_content = item_description_widget.get()
+                    quantity_content = quantity_widget.get()
+                    price_content = price_widget.get()
+                    expireDate_content = expire_date_widget.get()
+                    print(item_content, description_content,
+                          quantity_content, price_content, expireDate_content)
+                    add_item(item_content, description_content, price_content,
+                             quantity_content, expireDate_content)
+                    self.parent.switch_to_employee()
+                return on_click
+            button_4 = Button(
+                image=button_image_4,
+                borderwidth=0,
+                highlightthickness=0,
+                command=button_click(item_name, description,
+                                     quantity, price, expireDate),
+                relief="flat",
+            )
+            button_4.image = button_image_4
+            button_4.place(
+                x=799.0,
+                y=lastY + 5,
+                width=33.0,
+                height=33.0
+            )
+            print("Hello")
+        button_2 = Button(
+            image=self.button_image_2,
+            borderwidth=0,
+            highlightthickness=0,
+            command=create_new_item,
+            relief="flat"
+        )
+        button_2.place(
+            x=832.0,
+            y=107.0,
+            width=33.0,
+            height=33.0
+        )
+        for index, i in enumerate(item_select_all):
+            lastY = 197 + (index * 43) + 43
+            item_name = Entry(
+                bd=0,
+
+                fg="#000716",
+                highlightthickness=0,
+            )
+            item_name.insert(0, i['name'])
+            item_name.place(
+                x=48.0,
+                y=197.0 + (index * 43),
+                width=169.0,
+                height=41.0
+            )
+            description = Entry(
+                bd=0,
+
+                fg="#000716",
+                highlightthickness=0
+            )
+            description.insert(0, i['description'])
+            description.place(
+                x=217.0,
+                y=197.0 + (index * 43),
+                width=280.0,
+                height=41.0
+            )
+            quantity = Entry(
+                bd=0,
+
+                fg="#000716",
+                highlightthickness=0
+            )
+            quantity.insert(0, i["quantity"])
+            quantity.place(
+                x=497.0,
+                y=197.0 + (index * 43),
+                width=72.0,
+                height=41.0
+            )
+            price = Entry(
+                bd=0,
+
+                fg="#000716",
+                highlightthickness=0
+            )
+            price.insert(0, str(i["price"]) + "$")
+            price.place(
+                x=569.0,
+                y=197.0 + (index * 43),
+                width=78.0,
+                height=41.0
+            )
+            expireDate = Entry(
+                bd=0,
+
+                fg="#000716",
+                highlightthickness=0
+            )
+            expireDate.insert(0, i["expire_date"].strftime('%Y-%m-%d'))
+            expireDate.place(
+                x=647.0,
+                y=197.0 + (index * 43),
+                width=133.0,
+                height=41.0
+            )
+            button_image_4 = PhotoImage(
+                file=self.relative_to_assets("confirm.png"))
+
+            def update_item_data(item_name_widget, item_description_widget, quantity_widget, price_widget, expire_date_widget):
+
+                def on_click():
+                    item_content = item_name_widget.get()
+                    description_content = item_description_widget.get()
+                    quantity_content = quantity_widget.get()
+                    price_content = price_widget.get()
+                    expireDate_content = expire_date_widget.get()
+                    print(item_content, description_content,
+                          quantity_content, price_content, expireDate_content)
+                    update_item(item_content, description_content,
+                                price_content, quantity_content, expireDate_content)
+                    self.parent.switch_to_employee()
                 return on_click
             button_4 = Button(
                 image=button_image_4,
