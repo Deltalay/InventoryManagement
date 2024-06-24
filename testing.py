@@ -1554,21 +1554,28 @@ class Employee(Canvas):
                 height=41.0
             )
             button_image_4 = PhotoImage(
-                file=self.relative_to_assets("button_4.png"))
+                file=self.relative_to_assets("confirm.png"))
 
-            def button_click(entry_widget):
+            def update_item_data(item_name_widget, item_description_widget, quantity_widget, price_widget, expire_date_widget):
 
                 def on_click():
-                    entry_content = entry_widget.get()
-                    print(f"Entry content: {entry_content}")
-                    delete_items(entry_content)
-                    self.parent.switch_to_employee()
+                    item_content = item_name_widget.get()
+                    description_content = item_description_widget.get()
+                    quantity_content = quantity_widget.get()
+                    price_content = price_widget.get()
+                    expireDate_content = expire_date_widget.get()
+                    print(item_content, description_content,
+                          quantity_content, price_content, expireDate_content)
+                    update_item(item_content, description_content,
+                                price_content, quantity_content, expireDate_content)
+                    self.parent.switch_to_admin()
                 return on_click
             button_4 = Button(
                 image=button_image_4,
                 borderwidth=0,
                 highlightthickness=0,
-                command=button_click(item_name),
+                command=update_item_data(
+                    item_name, description, quantity, price, expireDate),
                 relief="flat",
             )
             button_4.image = button_image_4
